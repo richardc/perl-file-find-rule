@@ -305,7 +305,8 @@ L<Number::Compare> semantics.
                     }
                     return 0;
                 },
-              }
+              };
+            $self;
           };
         ++$i;
         no strict 'refs';
