@@ -18,7 +18,7 @@ is_deeply(run 't -maxdepth 0 -directory',
 
 {
     local $TODO = "Win32 cmd.exe hurts my brane"
-      if ($^O eq 'Win32' || $^O eq 'dos');
+      if ($^O =~ m/Win32/ || $^O eq 'dos');
 
     is_deeply(run 't -file -name \( foobar \*.t \)',
               [ qw( t/File-Find-Rule.t t/findrule.t t/foobar ) ],
