@@ -469,6 +469,19 @@ for my $setter (qw( maxdepth mindepth )) {
     *$setter = $sub;
 }
 
+
+=item C<relative>
+
+Trim the leading portion of any path found
+
+=cut
+
+sub relative () {
+    my $self = _force_object shift;
+    $self->{relative} = 1;
+    $self;
+}
+
 =item C<not_*>
 
 Negated version of the rule.  An effective shortand related to ! in
@@ -518,11 +531,15 @@ sub in {
     my $fragment = $self->_compile( $self->{subs} );
     my @subs = @{ $self->{subs} };
 
+    warn "relative mode handed multiple paths - that's a bit silly\n"
+      if $self->{relative} && @_ > 1;
+
     my $code = 'sub {
         (my $path = $File::Find::name)  =~ s#^\./##;
         my @args = ($_, $File::Find::dir, $path);
         my $maxdepth = $self->{maxdepth};
         my $mindepth = $self->{mindepth};
+        my $relative = $self->{relative};
 
         # figure out the relative path and depth
         my $relpath = $File::Find::name;
@@ -542,7 +559,12 @@ sub in {
         my $discarded;
         return unless ' . $fragment . ';
         return if $discarded;
-        push @found, $path;
+        if ($relative && $relpath ne "") {
+            push @found, $relpath;
+        }
+        else {
+            push @found, $path;
+        }
     }';
 
     #use Data::Dumper;

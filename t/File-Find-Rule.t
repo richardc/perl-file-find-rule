@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 36;
+use Test::More tests => 37;
 
 my $class;
 my @tests = qw( t/File-Find-Rule.t t/findrule.t );
@@ -259,6 +259,15 @@ is_deeply( [ find( file => '!name' => qr/^[^.]{1,8}(\.[^.]{0,3})?$/,
 is_deeply( [ find( maxdepth => 1, file => grep => [ qr/bytes./, [ qr/.?/ ] ], in => 't' ) ],
            [ 't/foobar' ],
            "grep" );
+
+
+
+# relative
+is_deeply( [ find( 'relative', maxdepth => 1, name => 'foobar', in => 't' ) ],
+           [ 'foobar' ],
+           'relative' );
+
+
 
 # bootstrapping extensions via import
 
