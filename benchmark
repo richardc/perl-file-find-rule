@@ -1,0 +1,24 @@
+#!/usr/local/bin/perl -w
+use lib qw(lib);
+use File::Find::Rule;
+use File::Find::Rule::Tweaked;
+use Time::HiRes;
+use Benchmark qw(:all);
+
+my $manystat = File::Find::Rule
+  ->file->size(">0")->size(">1")->size(">2")->size(">3")->size(">4")
+  ->size(">5")->size(">5")->size(">5")->size(">5")->size(">5")->size(">5")
+  ->size(">5")->size(">5")->size(">5")->size(">5")->size(">5")->size(">5")
+  ->size(">6");
+
+my $tweakmanystat = File::Find::Rule::Tweaked
+  ->file->size(">0")->size(">1")->size(">2")->size(">3")->size(">4")
+  ->size(">5")->size(">5")->size(">5")->size(">5")->size(">5")->size(">5")
+  ->size(">5")->size(">5")->size(">5")->size(">5")->size(">5")->size(">5")
+  ->size(">6");
+
+
+cmpthese(-1, {
+    tweaked => sub { $tweakmanystat->in('t') },
+    old => sub { $manystat->in('t') },
+});
