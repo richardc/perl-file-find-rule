@@ -1,3 +1,6 @@
+0.20_03 4th August, 2003
+	- Fix maxdepth? - this is undertested.
+
 0.20_02 25th June, 2003
 	- MANIFEST fixes (thanks to the cpan smokers)
 
