@@ -1,7 +1,8 @@
-0.09	January 2003
+0.09	21st January 2003
 	- Fix to the stat-based tests (spotted by Randal L. Schwartz)
 	- implemented our own import sub so we can bootstrap
 	  extensions more easily
+	- added some documentation about using extensions.
 
 0.08	28th October, 2002
 	- ->not_* and implicit s#^\./## (based on suggestions by Tony

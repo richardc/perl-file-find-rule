@@ -9,8 +9,7 @@ File::Find::Rule::Extending - the mini-guide to extending File::Find::Rule
  
  # take useful things from File::Find::Rule
  use base 'File::Find::Rule';
- our @EXPORT  = @File::Find::Rule::EXPORT;
- 
+
  # and force our crack into the main namespace
  sub File::Find::Rule::random () {
      my $self = shift()->_force_object;
@@ -30,11 +29,10 @@ possibility, using the following conventions.
  package File::Find::Rule::Random;
  use strict;
 
-=head2 Inherit and re-export File::Find::Rule
+=head2 Inherit methods from File::Find::Rule
 
  # take useful things from File::Find::Rule
  use base 'File::Find::Rule';
- our @EXPORT  = @File::Find::Rule::EXPORT;
  
 =head3 Force your madness into the main package
 
