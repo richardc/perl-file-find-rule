@@ -1,4 +1,4 @@
-svn 
+0.21 Monday 15th September, 2003 
 	pod glitch in File::Find::Rule::Procedural spotted and fixed
 	by Tom Hukins
 
