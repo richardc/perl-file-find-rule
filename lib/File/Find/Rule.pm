@@ -524,15 +524,17 @@ sub in {
         my $maxdepth = $self->{maxdepth};
         my $mindepth = $self->{mindepth};
 
-        # XXX fixme.  this should be the split of the path less the
-        # initial path
+        # figure out the relative path and depth
+        my $relpath = $File::Find::name;
+        $relpath =~ s{^\Q$File::Find::topdir\E/?}{};
+        my $depth = scalar File::Spec->splitdir($relpath);
+        #print "name: \'$File::Find::name\' ";
+        #print "relpath: \'$relpath\' depth: $depth\n";
 
-        my $depth = scalar File::Spec->splitdir($File::Find::name);
-
-        defined $maxdepth && $depth > $maxdepth
+        defined $maxdepth && $depth >= $maxdepth
            and $File::Find::prune = 1;
 
-        defined $mindepth && $depth <= $mindepth
+        defined $mindepth && $depth < $mindepth
            and return;
 
         #print "Testing \'$_\'\n";
