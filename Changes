@@ -1,4 +1,4 @@
-head
+0.28 Tuesday 18th May, 2004
 	exposed %X_tests and @stat_tests as package variables, and make a
 	_call_find method for File::Find::Rule::Filesys::Virtual
 
