@@ -22,7 +22,7 @@ File::Find::Rule - Alternative interface to File::Find
 
   use File::Find::Rule;
   # find all the subdirectories of a given directory
-  my @subdirs = File::Find::Rule->directory->find( $directory );
+  my @subdirs = File::Find::Rule->directory->in( $directory );
 
   # find all the .pm files in @INC
   my @files = File::Find::Rule->file()
