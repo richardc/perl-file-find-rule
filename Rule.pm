@@ -469,7 +469,8 @@ Opens a file and tests it each line at a time.
 
 For each line it evaluates each of the specifiers, stopping at the
 first successful match.  A specifier may be a regular expression or a
-subroutine.  The subroutine will be invoked with XXX as arguments.
+subroutine.  The subroutine will be invoked with the same parameters
+as an ->exec subroutine.
 
 It is possible to provide a set of negative specifiers by enclosing
 them in anonymous arrays.  Should a negative specifier match the
@@ -503,7 +504,7 @@ sub grep {
                              return $ret
                                if ref $rule eq 'Regexp'
                                  ? /$rule/
-                                 : $rule->();
+                                 : $rule->(@_);
                          }
                      }
                      return;
