@@ -1,3 +1,7 @@
+svn 
+	pod glitch in File::Find::Rule::Procedural spotted and fixed
+	by Tom Hukins
+
 0.20 8th September, 2003
 	- relative flag
 
