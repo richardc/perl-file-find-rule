@@ -1,8 +1,19 @@
 HEAD
 	- split the documentation of the procedural interface out to
-	  File::Find::Rule::Procedural, as people would often seem to get
-	  confused that the method calls didn't take anonymous arrays
+	  File::Find::Rule::Procedural, as people often seem to get
+	  confused that the method calls don't take anonymous arrays
 	  after seeing the procedural code that did
+
+	- Chunky internal restructure.  Now we compile a match sub
+	  from code fragments.  Though more complex, this is a big
+	  speed win as it eliminates a lot of the subroutine dispatch.
+
+	- During the restructure we lost the ->test method.  I hope
+	  that it's not missed, since maintining it through a
+	  deprecation cycle would be fiddly with the current _compile code.
+
+	- Split the findrule tests into their own file, and just skip
+	  the tricky ones on Win32.
 
 0.10	10th March 2003
 	- fixup an accidental warning in the stat-based tests.  Caught

@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.10';
+$VERSION = '0.20_01';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -88,7 +88,6 @@ sub find {
     $object;
 }
 
-=back
 
 =head1 METHODS
 
@@ -106,6 +105,7 @@ sub new {
     my $referent = shift;
     my $class = ref $referent || $referent;
     bless { rules    => [],  # [0]
+            subs     => [],  # [1]
             iterator => [],
             maxdepth => undef,
             mindepth => undef,
@@ -140,17 +140,11 @@ sub name {
     my $self = _force_object shift;
     my @names = map { ref $_ eq "Regexp" ? $_ : glob_to_regex $_ } @_;
 
-    push @{ $self->{rules} },
-      { rule => 'name',
-        code =>
-        sub {
-            for my $name (@names) {
-                return 1 if $_ =~ $name;
-            }
-            return 0;
-        },
+    push @{ $self->{rules} }, {
+        rule => 'name',
+        code => join( ' || ', map { "m($_)" } @names ),
         args => \@_,
-      };
+    };
 
     $self;
 }
@@ -210,15 +204,13 @@ C<accessed>, C<changed>), they have been included for completeness.
                  -C  =>  changed            =>  -B  =>  binary          =>
                 );
 
-    # XXX - this may be better done lazily via AUTOLOAD
     for my $test (keys %tests) {
-        my $sub = eval ' sub () {
+        my $sub = eval 'sub () {
             my $self = _force_object shift;
-            push @{ $self->{rules} },
-              {
-                code => sub { ' . $test . ' $_ ? 1 : 0 },
+            push @{ $self->{rules} }, {
+                code => "' . $test . ' \$_",
                 rule => "'.$tests{$test}.'",
-               };
+            };
             $self;
         } ';
         no strict 'refs';
@@ -256,8 +248,8 @@ L<Number::Compare> semantics.
 
             my @tests = map { Number::Compare->new($_) } @_;
 
-            push @{ $self->{rules} },
-              { rule => $t,
+            push @{ $self->{rules} }, {
+                rule => $t,
                 args => \@_,
                 code => sub {
                     my $value = (stat $_)[$index] || 0;
@@ -266,9 +258,9 @@ L<Number::Compare> semantics.
                     }
                     return 0;
                 },
-              };
+            };
             $self;
-          };
+        };
         ++$i;
         no strict 'refs';
         *$t = $sub;
@@ -284,9 +276,9 @@ default and-like nature of combined rules.  C<any> and C<or> are
 interchangeable.
 
  # find avis, movs, things over 200M and empty files
- $rule->any( find( name => [ '*.avi', '*.mov' ] ),
-             find( size => '>200M' ),
-             find( file => empty => ),
+ $rule->any( File::Find::Rule->name( '*.avi', '*.mov' ),
+             File::Find::Rule->size( '>200M' ),
+             File::Find::Rule->file->empty,
            );
 
 =cut
@@ -295,17 +287,13 @@ sub any {
     my $self = _force_object shift;
     my @rulesets = @_;
 
-    push @{ $self->{rules} },
-      { rule => 'any',
-        code => sub {
-            for my $ruleset (@rulesets) {
-                my $match = $ruleset->test(@_);
-                return $match if $match || !defined $match;
-            }
-            return 0;
-        },
+    push @{ $self->{rules} }, {
+        rule => 'any',
+        code => '(' . join( ' || ', map {
+            "( " . $_->_compile( $self->{subs} ) . " )"
+        } @_ ) . ")",
         args => \@_,
-      };
+    };
     $self;
 }
 
@@ -320,7 +308,7 @@ interchangeable.
 
   # files that aren't 8.3 safe
   $rule->file
-       ->not( $rule->new->name( qr/^[^.]{1,8}(\.[^.]{,3})?$/ ) );
+       ->not( $rule->new->name( qr/^[^.]{1,8}(\.[^.]{0,3})?$/ ) );
 
 =cut
 
@@ -328,18 +316,13 @@ sub not {
     my $self = _force_object shift;
     my @rulesets = @_;
 
-    push @{ $self->{rules} },
-      {
-       rule => 'not',
-       args => \@rulesets,
-       code => sub {
-           for my $ruleset (@rulesets) {
-               my $match = $ruleset->test(@_);
-               return 0 if $match || !defined $match;
-           }
-           return 1;
-       },
-      };
+    push @{ $self->{rules} }, {
+        rule => 'not',
+        args => \@rulesets,
+        code => '(' . join ( ' && ', map {
+            "!(". $_->_compile( $self->{subs} ) . ")"
+        } @_ ) . ")",
+    };
     $self;
 }
 
@@ -357,7 +340,7 @@ sub prune () {
     push @{ $self->{rules} },
       {
        rule => 'prune',
-       code => sub { $File::Find::prune = 1 }
+       code => '$File::Find::prune = 1'
       };
     $self;
 }
@@ -371,12 +354,10 @@ Don't keep this file.  This rule always matches.
 sub discard () {
     my $self = _force_object shift;
 
-    push @{ $self->{rules} },
-      { rule => 'discard',
-        code => sub {
-            return;
-        }
-      };
+    push @{ $self->{rules} }, {
+        rule => 'discard',
+        code => '$discarded = 1',
+    };
     $self;
 }
 
@@ -397,9 +378,10 @@ sub exec {
     my $self = _force_object shift;
     my $code = shift;
 
-    push @{ $self->{rules} },
-      { name => 'exec',
-        code => sub { $code->(@_) ? 1 : 0 } };
+    push @{ $self->{rules} }, {
+        rule => 'exec',
+        code => $code,
+    };
     $self;
 }
 
@@ -434,20 +416,20 @@ sub grep {
       } @_;
 
     $self->exec( sub {
-                     local *FILE;
-                     open FILE, $_ or return;
-                     local ($_, $.);
-                     while (<FILE>) {
-                         for my $p (@pattern) {
-                             my ($rule, $ret) = @$p;
-                             return $ret
-                               if ref $rule eq 'Regexp'
-                                 ? /$rule/
-                                 : $rule->(@_);
-                         }
-                     }
-                     return;
-                 } );
+        local *FILE;
+        open FILE, $_ or return;
+        local ($_, $.);
+        while (<FILE>) {
+            for my $p (@pattern) {
+                my ($rule, $ret) = @$p;
+                return $ret
+                  if ref $rule eq 'Regexp'
+                    ? /$rule/
+                      : $rule->(@_);
+            }
+        }
+        return;
+    } );
 }
 
 =item C<maxdepth( $level )>
@@ -512,31 +494,6 @@ sub AUTOLOAD {
 
 =over
 
-=item C<test( $shortname, $path, $fullname )>
-
-Invoked in the same way as callbacks invoked for L</exec> rules.
-
-Returns true or undef if the rule matches (undef indicates that
-although the rule was succesful, a C<discard> clause fired)
-
- my $rule = File::Find::Rule->name( '*.mp3' );
- print $rule->test( 'foo.ogg' ) ? "matches\n" : "no match\n";
-                                       # prints "no match";
-
-=cut
-
-sub test {
-    my $self = shift;
-
-    my $return = 1;
-    for my $rule (@{ $self->{rules} }) { # [0]
-        my $match = $rule->{code}->(@_);
-        $return = $match if !defined $match;
-        return $match unless $match || !defined $match;
-    }
-    $return;
-}
-
 =item C<in( @directories )>
 
 Evaluates the rule, returns a list of paths to matching files and
@@ -549,28 +506,61 @@ sub in {
 
     my $cwd = getcwd;
     my @found;
-    File::Find::find
-        (
-         sub {
-             (my $path = $File::Find::name) =~ s#^\./##;
-             my $depth = scalar File::Spec->splitdir($File::Find::name);
-             my $maxdepth = $self->{maxdepth};
-             my $mindepth = $self->{mindepth};
+    my $fragment = $self->_compile( $self->{subs} );
+    my @subs = @{ $self->{subs} };
 
-             defined $maxdepth && $depth > $maxdepth
-               and $File::Find::prune = 1;
+    my $code = 'sub {
+        (my $path = $File::Find::name)  =~ s#^\./##;
+        my @args = ($_, $File::Find::dir, $path);
+        my $maxdepth = $self->{maxdepth};
+        my $mindepth = $self->{mindepth};
 
-             defined $mindepth && $depth <= $mindepth
-               and return;
+        # XXX fixme.  this should be the split of the path less the
+        # initial path
 
-             push @found, $path
-               if $self->test($_,
-                              $File::Find::dir,
-                              $path);
-         }, @_);
+        my $depth = scalar File::Spec->splitdir($File::Find::name);
+
+        defined $maxdepth && $depth > $maxdepth
+           and $File::Find::prune = 1;
+
+        defined $mindepth && $depth <= $mindepth
+           and return;
+
+        #print "Testing \'$_\'\n";
+
+        my $discarded;
+        return unless ' . $fragment . ';
+        return if $discarded;
+        push @found, $path;
+    }';
+
+    #use Data::Dumper;
+    #print Dumper \@subs;
+    #print "Compiled sub: '$code'\n";
+
+    my $sub = eval "$code" or die "compile error '$code' $@";
+    File::Find::find( $sub, @_ );
     chdir $cwd;
 
     return @found;
+}
+
+sub _compile {
+    my $self = shift;
+    my $subs = shift; # [1]
+
+    return '1' unless @{ $self->{rules} };
+    my $code = join " && ", map {
+        if (ref $_->{code}) {
+            push @$subs, $_->{code};
+            "\$subs[$#{$subs}]->(\@args) # $_->{rule}\n";
+        }
+        else {
+            "( $_->{code} ) # $_->{rule}\n";
+        }
+    } @{ $self->{rules} };
+
+    return $code;
 }
 
 =item C<start( @directories )>
@@ -579,7 +569,7 @@ Starts a find across the specified directories.  Matching items may
 then be queried using L</match>.  This allows you to use a rule as an
 iterator.
 
- my $rule = find( file => name => "*.jpeg", start => "/web" );
+ my $rule = File::Find::Rule->file->name("*.jpeg")->start( "/web" );
  while ( my $image = $rule->match ) {
      ...
  }
@@ -715,6 +705,19 @@ Implementation notes:
 repeatedly from match.  It'll probably be way more effecient to
 instead eval-string compile a dedicated matching sub, and call that to
 avoid the repeated sub dispatch.
+
+[1] Though [0] isn't as true as it once was, I'm not sure that the
+subs stack is exposed in quite the right way.  Maybe it'd be better as
+a private global hash.  Something like $subs{$self} = []; and in
+C<DESTROY>, delete $subs{$self}.
+
+That'd make compiling subrules really much easier (no need to pass
+@subs in for context), and things that work via a mix of callbacks and
+code fragments are possible (you'd probably want this for the stat
+tests).
+
+Need to check this currently working version in before I play with
+that though.
 
 [*] There's probably a win to be made with the current model in making
 stat calls use C<_>.  For

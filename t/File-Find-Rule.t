@@ -2,10 +2,10 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 40;
+use Test::More tests => 34;
 
 my $class;
-my $this = "t/File-Find-Rule.t";
+my @tests = qw( t/File-Find-Rule.t t/findrule.t );
 BEGIN {
     $class = 'File::Find::Rule';
     use_ok($class)
@@ -17,8 +17,8 @@ isa_ok($f, $class);
 
 # name
 $f = $class->name( qr/\.t$/ );
-is_deeply( [ $f->in('t') ],
-           [ $this ],
+is_deeply( [ sort $f->in('t') ],
+           [ @tests ],
            "name( qr/\\.t\$/ )" );
 
 $f = $class->name( 'foobar' );
@@ -27,8 +27,8 @@ is_deeply( [ $f->in('t') ],
            "name( 'foobar' )" );
 
 $f = $class->name( '*.t' );
-is_deeply( [ $f->in('t') ],
-          [ $this ],
+is_deeply( [ sort $f->in('t') ],
+          \@tests,
           "name( '*.t' )" );
 
 # exec
@@ -39,7 +39,7 @@ is_deeply( [ $f->in('t') ],
 
 $f = $class->exec(sub { length > 10 })->maxdepth(1);
 is_deeply( [ $f->in('t') ],
-           [ $this ],
+           [ 't/File-Find-Rule.t' ],
            "exec (long)" );
 
 is_deeply( [ find( maxdepth => 1, exec => sub { $_[2] eq 't/foobar' }, in => 't' ) ],
@@ -52,7 +52,7 @@ $f = $class
   ->name( qr/\.t$/ );
 
 is_deeply( [ $f->in('t') ],
-           [ $this ],
+           [ 't/File-Find-Rule.t' ],
            "exec(match) and name(match)" );
 
 $f = $class
@@ -83,7 +83,7 @@ $f = $class->any( $class->exec( sub { length == 6 } ),
                 )->maxdepth(1);
 
 is_deeply( [ sort $f->in('t') ],
-           [ $this, 't/foobar' ],
+           [ 't/File-Find-Rule.t', 't/foobar' ],
            "any" );
 
 $f = $class->or( $class->exec( sub { length == 6 } ),
@@ -92,28 +92,28 @@ $f = $class->or( $class->exec( sub { length == 6 } ),
                )->maxdepth(1);
 
 is_deeply( [ sort $f->in('t') ],
-           [ $this, 't/foobar' ],
+           [ 't/File-Find-Rule.t', 't/foobar' ],
            "or" );
 
 
 # not/none
 $f = $class
   ->file
-  ->not( $class->name( qr/^[^.]{1,8}(\.[^.]{,3})?$/ ) )
+  ->not( $class->name( qr/^[^.]{1,8}(\.[^.]{0,3})?$/ ) )
   ->maxdepth(1)
   ->exec(sub { length == 6 || length > 10 });
 is_deeply( [ $f->in('t') ],
-           [ $this ],
+           [ 't/File-Find-Rule.t' ],
            "not" );
 
 # not as not_*
 $f = $class
   ->file
-  ->not_name( qr/^[^.]{1,8}(\.[^.]{,3})?$/ )
+  ->not_name( qr/^[^.]{1,8}(\.[^.]{0,3})?$/ )
   ->maxdepth(1)
   ->exec(sub { length == 6 || length > 10 });
 is_deeply( [ $f->in('t') ],
-           [ $this ],
+           [ 't/File-Find-Rule.t' ],
            "not_*" );
 
 # prune/discard (.svn demo)
@@ -126,7 +126,7 @@ $f = $class->or( $class->directory
                  $class->new->file );
 
 is_deeply( [ sort $f->in('t') ],
-           [ $this, 't/foobar', 't/lib/File/Find/Rule/Test/ATeam.pm' ],
+           [ @tests, 't/foobar', 't/lib/File/Find/Rule/Test/ATeam.pm' ],
            "prune/discard .svn"
          );
 
@@ -139,7 +139,7 @@ $f = find(or => [ find( directory =>
                   find( file => ) ]);
 
 is_deeply( [ sort $f->in('t') ],
-           [ $this, 't/foobar', 't/lib/File/Find/Rule/Test/ATeam.pm' ],
+           [ @tests, 't/foobar', 't/lib/File/Find/Rule/Test/ATeam.pm' ],
            "procedural prune/discard .svn"
          );
 
@@ -163,7 +163,7 @@ is_deeply( [ find( maxdepth => 1, file => size => "<1K",
            "size <1K (stat)" );
 
 is_deeply( [ find( maxdepth => 1, file => size => ">3K", in => 't' ) ],
-           [ $this ],
+           [ 't/File-Find-Rule.t' ],
            "size >3K (stat)" );
 
 # these next two should never fail.  if they do then the testing fairy
@@ -190,7 +190,7 @@ is_deeply( [ sort +find( or => [ find( name => '.svn',
                                ],
                          maxdepth => 1,
                          in => 't' ) ],
-           [ 't', $this, 't/foobar', 't/lib' ],
+           [ 't', @tests, 't/foobar', 't/lib' ],
            "maxdepth == 1" );
 
 
@@ -208,7 +208,7 @@ is_deeply( [ sort +find( or => [ find( name => '.svn',
                                ],
                          mindepth => 1,
                          in => 't' ) ],
-           [ $this, 't/foobar', @ateam_path ],
+           [ @tests, 't/foobar', @ateam_path ],
            "mindepth == 1" );
 
 
@@ -219,7 +219,7 @@ is_deeply( [ sort +find( or => [ find( name => '.svn',
                          maxdepth => 1,
                          mindepth => 1,
                          in => 't' ) ],
-           [ $this, 't/foobar', 't/lib' ],
+           [ @tests, 't/foobar', 't/lib' ],
            "maxdepth = 1 mindepth == 1" );
 
 #iterator
@@ -233,14 +233,14 @@ $f = find( or => [ find( name => '.svn',
 {
 my @found;
 while ($_ = $f->match) { push @found, $_ }
-is_deeply( [ sort @found ], [ 't', $this, 't/foobar', @ateam_path ], "iterator" );
+is_deeply( [ sort @found ], [ 't', @tests, 't/foobar', @ateam_path ], "iterator" );
 }
 
 # negating in the procedural interface
-is_deeply( [ find( file => '!name' => qr/^[^.]{1,8}(\.[^.]{,3})?$/,
+is_deeply( [ find( file => '!name' => qr/^[^.]{1,8}(\.[^.]{0,3})?$/,
                    maxdepth => 1,
                    in => 't' ) ],
-           [ $this ],
+           [ 't/File-Find-Rule.t' ],
            "negating in the procedural interface" );
 
 # grep
@@ -259,33 +259,3 @@ like( $@, qr/^couldn't bootstrap File::Find::Rule::Test::Elusive/,
 eval { $class->import(':Test::ATeam') };
 is ($@, "",  "if you can find them, maybe you can hire the A-Team" );
 can_ok( $class, 'ba' );
-
-
-# extra tests for findrule.  these are more for testing the parsing code.
-
-sub run ($) {
-    my $expr = shift;
-    # dosish systems don't treat \ as special, so lose it
-    $expr =~ s~\\~~g if ($^O eq 'Win32' || $^O eq 'dos');
-
-    [ sort split /\n/, `$^X -Iblib/lib -Iblib/arch findrule $expr 2>&1` ];
-}
-
-is_deeply(run 't -file -name foobar', [ 't/foobar' ],
-          '-file -name foobar');
-
-is_deeply(run 't -maxdepth 0 -directory',
-          [ 't' ], 'last clause has no args');
-
-
-is_deeply(run 't -file -name \( foobar \*.t \)',
-          [ $this, 't/foobar' ], 'grouping ()');
-
-is_deeply(run 't -name \( -foo foobar \)',
-          [ 't/foobar' ], 'grouping ( -literal )');
-
-is_deeply(run 't -file -name foobar baz',
-          [ "unknown option 'baz'" ], 'no implicit grouping');
-
-is_deeply(run 't -maxdepth 0 -name -file',
-          [], 'terminate at next -');
