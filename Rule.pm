@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = 0.05;
+$VERSION = 0.06;
 @ISA = 'Exporter';
 @EXPORT = qw( find rule );
 
@@ -476,7 +476,7 @@ It is possible to provide a set of negative specifiers by enclosing
 them in anonymous arrays.  Should a negative specifier match the
 iteration is aborted and the clause is failed.  For example:
 
- $rule->grep( qr/^#!.*\bperl/ }, [ sub { 1 } ] );
+ $rule->grep( qr/^#!.*\bperl/, [ sub { 1 } ] );
 
 Is a passing clause if the first line of a file looks like a perl
 shebang line.

@@ -1,3 +1,7 @@
+0.06	22nd October, 2002
+	-> Fix the code example for the ->grep clause (again from
+	   Douglas Wilson)
+
 0.05	21st October, 2002
 	- ->grep clause - from original code from Douglas Wilson
         - Bugfix the demo code in the synopsis - pointed out by Barbie
