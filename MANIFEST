@@ -2,8 +2,9 @@ MANIFEST
 README
 Changes
 Makefile.PL
-Rule.pm
-Extending.pod
+lib/File/Find/Rule.pm
+lib/File/Find/Rule/Extending.pod
+lib/File/Find/Rule/Procedural.pod
 t/File-Find-Rule.t
 t/foobar
 t/lib/File/Find/Rule/Test/ATeam.pm
