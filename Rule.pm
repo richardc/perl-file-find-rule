@@ -299,7 +299,7 @@ L<Number::Compare> semantics.
               { rule => $t,
                 args => \@_,
                 code => sub {
-                    my $value = (stat $_)[$index];
+                    my $value = (stat $_)[$index] || 0;
                     for my $test (@tests) {
                         return 1 if $test->($value);
                     }
