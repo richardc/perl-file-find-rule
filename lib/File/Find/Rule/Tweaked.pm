@@ -3,6 +3,9 @@ use strict;
 package File::Find::Rule::Tweaked;
 use base 'File::Find::Rule';
 
+my @testnames = qw( dev ino mode nlink uid gid rdev
+                      size atime mtime ctime blksize blocks );
+
 sub size {
     my $self = File::Find::Rule::_force_object shift;
 
@@ -13,7 +16,10 @@ sub size {
         rule => 'size',
         args => \@_,
         code => sub {
-            my $value = (stat $_)[$index] || 0;
+            unless ($self->{_data}{stat}) {
+                @{$self->{_data}{stat}}{@testnames} = stat $_;
+            }
+            my $value = $self->{_data}{stat}{'size'} || 0;
             for my $test (@tests) {
                 return 1 if $test->($value);
             }
@@ -23,6 +29,13 @@ sub size {
 
 #    print "foo\n";
     $self;
+}
+
+sub in {
+    my $self = shift;
+
+    delete $self->{_data};
+    $self->SUPER::in(@_);
 }
 
 1;
