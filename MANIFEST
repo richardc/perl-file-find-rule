@@ -1,4 +1,5 @@
 MANIFEST
+README
 Changes
 Makefile.PL
 Build.PL
