@@ -1,0 +1,16 @@
+0.05	4th October, 2002
+	- ->grep clause - from original code from Douglas Wilson
+
+0.04	10th September, 2002
+	- create a correctly spelled writable rule (thanks to Iain
+	  Truskett for this one)
+
+0.03	24th August, 2002
+	- backport to 5.00503 (hadn't tested before this point)
+
+0.02	14th August, 2002
+	- bugfix ->exec subrule invocation (thanks to Chris Carline
+	  for pointing this out)
+
+0.01	26th July, 2002
+	- Inital release
