@@ -13,39 +13,51 @@ for (@INC) {
                    in => $dir );
 }
 
+# what directories are we searching in?
+my @where;
+while (@ARGV) {
+    local $_ = shift @ARGV;
+    if (/^-/) {
+        unshift (@ARGV);
+        last;
+    }
+    push @where, $_;
+}
+
 # parse arguments, build a rule object
 my $rule = new File::Find::Rule;
 while (@ARGV) {
     my $clause = shift @ARGV;
+    $clause =~ s/^-//;
+
     unless ( $rule->can( $clause ) ) {
-        # not a known rule - must be a place to search in, put it back
-        # and go on to the matching part
-        unshift @ARGV, $clause;
-        last;
+        # not a known rule - complain about this
+        die "unknown option '-$clause'\n"
     }
 
-    if (defined prototype "File::Find::Rule::$clause") {
-        # it has a null prototype, so it takes no args.  add it and go
-        # to the next token
+    # consume the parameters
+    my $param = shift @ARGV;
+
+    if ($param =~ /^-/) {
+        # it's the next switch - put it back, and add one with no params
+        unshift @ARGV, $param;
         $rule->$clause();
         next;
     }
 
-    # grab the parameters
-    my $param = shift @ARGV;
-    if ($param eq '[') {
-        # multiple values
+    if ($param eq '(') {
+        # multiple values - just look for the closing parenthesis
         my @p;
         while (@ARGV) {
             my $val = shift @ARGV;
-            last if $val eq ']';
+            last if $val eq ')';
             push @p, $val;
         }
         $rule->$clause( @p );
         next;
     }
 
-    # just a single parameter
+    # a single argument
     $rule->$clause( $param );
 }
 
@@ -53,7 +65,7 @@ while (@ARGV) {
 $rule->exec( sub { print "$_[2]\n"; return; } );
 
 # profit
-$rule->in( @ARGV ? @ARGV : '.' );
+$rule->in( @where ? @where : '.' );
 exit 0;
 
 __END__
@@ -64,15 +76,32 @@ findrule - command line wrapper to File::Find::Rule
 
 =head1 USAGE
 
-  findrule file name Rule.pm
+  findrule [path...] [expression]
 
 =head1 DESCRIPTION
+
+C<findrule> mostly borrows the interface from GNU find(1) to provide a
+command-line interface onto the File::Find::Rule heirarchy of modules.
+
+ find foo -file -name ( foo bar )
+ find foo -file -name foo -bar
+ find foo -file -name ( foo -bar )
+
 
 =head1 AUTHOR
 
 Richard Clamp <richardc@unixbeard.net> from a suggestion by Tatsuhiko Miyagawa
 
+=head1 COPYRIGHT
+
+Copyright (C) 2002 Richard Clamp.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
 =head1 SEE ALSO
 
 L<File::Find::Rule>
+
+=cut
 

@@ -15,6 +15,7 @@ WriteMakefile(
                                'Rule.pm'       => '$(INST_LIBDIR)/Rule.pm',
                                'Extending.pod' => '$(INST_LIBDIR)/Rule/Extending.pod',
                               },
+              EXE_FILES    => [ 'findrule' ],
               AUTHOR       => 'Richard Clamp <richardc@unixbeard.net>',
              );
 
