@@ -1,0 +1,46 @@
+=head1 NAME
+
+File::Find::Rule::Extending - the mini-guide to extending File::Find::Rule
+
+=head1 SYNOPSIS
+
+ package File::Find::Rule::Random;
+ use strict;
+ 
+ # take useful things from File::Find::Rule
+ use base 'File::Find::Rule';
+ our @EXPORT  = @File::Find::Rule::EXPORT;
+ 
+ # and force our crack into the main namespace
+ sub File::Find::Rule::random () {
+     my $self = shift()->_force_object;
+     $self->exec( sub { rand > 0.5 } );
+ }
+ 
+ 1;
+
+=head1 DESCRIPTION
+
+File::Find::Rule went down so well with the buying public that every
+wanted to add extra features.  With the 0.07 release this became a 
+
+=head1 AUTHOR
+
+Richard Clamp <richardc@unixbeard.net>
+
+=head1 COPYRIGHT
+
+Copyright (C) 2002 Richard Clamp.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<File::Find::Rule>
+
+=cut
+
+
+
+
