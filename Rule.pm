@@ -2,7 +2,7 @@
 
 package File::Find::Rule;
 use strict;
-use vars qw/$VERSION @ISA @EXPORT %TAKES_ARGS/;
+use vars qw/$VERSION @ISA @EXPORT/;
 use Exporter;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
@@ -98,7 +98,7 @@ sub find {
             $not = 1;
             next;
         }
-        if ($TAKES_ARGS{$method}) {
+        unless (defined prototype $method) {
             my $args = shift;
             @args = ref $args eq 'ARRAY' ? @$args : $args;
         }
@@ -162,7 +162,6 @@ expressions.
 
 =cut
 
-$TAKES_ARGS{name} = 1;
 sub name {
     my $self = _force_object shift;
     my @names = map { ref $_ eq "Regexp" ? $_ : glob_to_regex $_ } @_;
@@ -239,7 +238,7 @@ C<accessed>, C<changed>), they have been included for completeness.
 
     # XXX - this may be better done lazily via AUTOLOAD
     for my $test (keys %tests) {
-        my $sub = eval ' sub {
+        my $sub = eval ' sub () {
             my $self = _force_object shift;
             push @{ $self->{rules} },
               {
@@ -285,7 +284,6 @@ standard: http://physics.nist.gov/cuu/Units/binary.html
 
     my $i = 0;
     for my $t (@tests) {
-        $TAKES_ARGS{$t} = 1;
         my $index = $i; # needs to be here so it can be closed over
         my $sub = sub {
             my $self = _force_object shift;
@@ -345,8 +343,6 @@ interchangeable.
 
 =cut
 
-$TAKES_ARGS{any} = 1;
-$TAKES_ARGS{or}  = 1;
 sub any {
     my $self = _force_object shift;
     my @rulesets = @_;
@@ -380,8 +376,6 @@ interchangeable.
 
 =cut
 
-$TAKES_ARGS{not}  = 1;
-$TAKES_ARGS{none} = 1;
 sub not {
     my $self = _force_object shift;
     my @rulesets = @_;
@@ -409,7 +403,7 @@ Traverse no further.  This rule always matches.
 
 =cut
 
-sub prune {
+sub prune () {
     my $self = _force_object shift;
 
     push @{ $self->{rules} },
@@ -426,7 +420,7 @@ Don't keep this file.  This rule always matches.
 
 =cut
 
-sub discard {
+sub discard () {
     my $self = _force_object shift;
 
     push @{ $self->{rules} },
@@ -451,7 +445,6 @@ Return a true value if your rule matched.
 
 =cut
 
-$TAKES_ARGS{exec} = 1;
 sub exec {
     my $self = _force_object shift;
     my $code = shift;
@@ -482,7 +475,6 @@ shebang line.
 
 =cut
 
-$TAKES_ARGS{grep} = 1;
 sub grep {
     my $self = _force_object shift;
     my @pattern = map {
@@ -529,7 +521,6 @@ used.
 =cut
 
 for my $setter (qw( maxdepth mindepth )) {
-    $TAKES_ARGS{$setter} = 1;
     my $sub = sub {
         my $self = _force_object shift;
         $self->{$setter} = shift;
@@ -577,7 +568,6 @@ directories.
 
 =cut
 
-$TAKES_ARGS{in} = 1;
 sub in {
     my $self = _force_object shift;
 
@@ -619,7 +609,6 @@ iterator.
 
 =cut
 
-$TAKES_ARGS{start} = 1;
 sub start {
     my $self = _force_object shift;
 
