@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 37;
+use Test::More tests => 38;
 
 my $class;
 my @tests = qw( t/File-Find-Rule.t t/findrule.t );
@@ -233,6 +233,11 @@ is_deeply( [ sort +find( or => [ find( name => '.svn',
                          in => 't' ) ],
            [ @tests, 't/foobar', 't/lib' ],
            "maxdepth = 1 mindepth == 1" );
+
+# extras
+my $ok = 0;
+find( extras => { preprocess => sub { $ok = 1 } }, in => 't' );
+ok( $ok, "extras preprocess fired" );
 
 #iterator
 $f = find( or => [ find( name => '.svn',

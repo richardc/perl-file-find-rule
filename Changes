@@ -1,3 +1,6 @@
+0.23 Friday 3rd October, 2003
+	make the extras hash work and add a proper test for it. (Doh!)
+
 0.22 Friday 3rd October, 2003
 	add in ->extras hash for passing things through to File::Find::find
 

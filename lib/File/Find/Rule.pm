@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.22';
+$VERSION = '0.23';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -583,8 +583,7 @@ sub in {
     #print "Compiled sub: '$code'\n";
 
     my $sub = eval "$code" or die "compile error '$code' $@";
-    # XXX need to let people pass things in to the hash
-    File::Find::find( { %{ $self->extras }, wanted => $sub }, @_ );
+    File::Find::find( { %{ $self->{extras} }, wanted => $sub }, @_ );
     chdir $cwd;
 
     return @found;
