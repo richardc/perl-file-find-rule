@@ -1,0 +1,78 @@
+#!perl -w
+use strict;
+use File::Find::Rule;
+use File::Spec::Functions qw(catdir);
+
+# bootstrap extensions
+for (@INC) {
+    my $dir = catdir($_, qw( File Find Rule ) );
+    next unless -d $dir;
+    my @pm = find( name => '*.pm', maxdepth => 1,
+                   exec => sub { (my $name = $_) =~ s/\.pm$//;
+                                 eval "require File::Find::Rule::$name"; },
+                   in => $dir );
+}
+
+# parse arguments, build a rule object
+my $rule = new File::Find::Rule;
+while (@ARGV) {
+    my $clause = shift @ARGV;
+    unless ( $rule->can( $clause ) ) {
+        # not a known rule - must be a place to search in, put it back
+        # and go on to the matching part
+        unshift @ARGV, $clause;
+        last;
+    }
+
+    if (defined prototype "File::Find::Rule::$clause") {
+        # it has a null prototype, so it takes no args.  add it and go
+        # to the next token
+        $rule->$clause();
+        next;
+    }
+
+    # grab the parameters
+    my $param = shift @ARGV;
+    if ($param eq '[') {
+        # multiple values
+        my @p;
+        while (@ARGV) {
+            my $val = shift @ARGV;
+            last if $val eq ']';
+            push @p, $val;
+        }
+        $rule->$clause( @p );
+        next;
+    }
+
+    # just a single parameter
+    $rule->$clause( $param );
+}
+
+# add a print rule so things happen faster
+$rule->exec( sub { print "$_[2]\n"; return; } );
+
+# profit
+$rule->in( @ARGV ? @ARGV : '.' );
+exit 0;
+
+__END__
+
+=head1 NAME
+
+findrule - command line wrapper to File::Find::Rule
+
+=head1 USAGE
+
+  findrule file name Rule.pm
+
+=head1 DESCRIPTION
+
+=head1 AUTHOR
+
+Richard Clamp <richardc@unixbeard.net> from a suggestion by Tatsuhiko Miyagawa
+
+=head1 SEE ALSO
+
+L<File::Find::Rule>
+
