@@ -684,6 +684,9 @@ under the same terms as Perl itself.
 
 L<File::Find>, L<Text::Glob>, L<Number::Compare>, find(1)
 
+And if you have an idea for a neat extension
+L<File::Find::Rule::Extending>
+
 =cut
 
 Implementation notes:

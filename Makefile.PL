@@ -11,6 +11,10 @@ WriteMakefile(
                                'File::Spec'      => 0,
                                'Cwd'             => 0,
                               },
+              PM           => {
+                               'Rule.pm'       => '$(INST_LIBDIR)/Rule.pm',
+                               'Extending.pod' => '$(INST_LIBDIR)/Rule/Extending.pod',
+                              },
               AUTHOR       => 'Richard Clamp <richardc@unixbeard.net>',
              );
 
