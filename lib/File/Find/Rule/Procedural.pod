@@ -9,7 +9,7 @@ File::Find::Rule::Procedural - File::Find::Rule's procedural interface
   # find all .pm files, procedurally
   my @files = find(file => name => '*.pm', in => \@INC);
 
-=HEAD1 DESCRIPTION
+=head1 DESCRIPTION
 
 In addition to the regular object-oriented interface,
 L<File::Find::Rule> provides two subroutines for you to use.
