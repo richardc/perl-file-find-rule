@@ -1,5 +1,8 @@
-0.27 Wednesday 25th February, 2004
+head
+	exposed %X_tests and @stat_tests as package variables for
+	File::Find::Rule::Filesys::Virtual
 
+0.27 Wednesday 25th February, 2004
 	Changed to write_makefile_pl to 'traditional' from
 	'passthrough'.  Fixes INDIRECTLY REPORTED install problems
 	caused by new Module::Build being backwards incompatible.
