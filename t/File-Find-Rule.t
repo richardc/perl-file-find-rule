@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 30;
+use Test::More tests => 31;
 
 my $class;
 my $this = "t/File-Find-Rule.t";
@@ -106,6 +106,15 @@ is_deeply( [ $f->in('t') ],
            [ $this ],
            "not" );
 
+# not as not_*
+$f = $class
+  ->file
+  ->not_name( qr/^[^.]{1,8}(\.[^.]{,3})?$/ )
+  ->maxdepth(1)
+  ->exec(sub { length == 6 || length > 10 });
+is_deeply( [ $f->in('t') ],
+           [ $this ],
+           "not_*" );
 
 # prune/discard (.svn demo)
 # this test may be a little meaningless for a cpan release, but it
