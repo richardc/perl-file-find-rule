@@ -1,6 +1,5 @@
 #       $Id$
 
-
 package File::Find::Rule;
 use strict;
 use vars qw/$VERSION @ISA @EXPORT $AUTOLOAD/;
