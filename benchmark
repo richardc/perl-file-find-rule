@@ -18,7 +18,7 @@ my $tweakmanystat = File::Find::Rule::Tweaked
   ->size(">6");
 
 
-cmpthese(-3, {
+cmpthese(-8, {
     tweaked => sub { $tweakmanystat->in('t') },
-    old => sub { $manystat->in('t') },
+    old     => sub { $manystat->in('t') },
 });
