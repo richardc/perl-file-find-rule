@@ -3,7 +3,6 @@
 package File::Find::Rule;
 use strict;
 use vars qw/$VERSION @ISA @EXPORT $AUTOLOAD/;
-use Exporter;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
 use Number::Compare;
@@ -12,8 +11,21 @@ use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
 $VERSION = 0.08;
-@ISA = 'Exporter';
-@EXPORT = qw( find rule );
+
+# we'd just inherit from Exporter, but I want the colon
+sub import {
+    my $pkg = shift;
+    my $to  = caller;
+    for my $sym ( qw( find rule ) ) {
+        no strict 'refs';
+        *{"$to\::$sym"} = \&{$sym};
+    }
+    for (grep /^:/, @_) {
+        my ($extension) = /^:(.*)/;
+        eval "require File::Find::Rule::$extension";
+        croak "couldn't bootstrap File::Find::Rule::$extension: $@" if $@;
+    }
+}
 
 =head1 NAME
 

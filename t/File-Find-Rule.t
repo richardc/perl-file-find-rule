@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 37;
+use Test::More tests => 40;
 
 my $class;
 my $this = "t/File-Find-Rule.t";
@@ -72,7 +72,7 @@ $f = $class
   ->exec(sub { $_ ne '.svn' }); # ignore .svn dir
 
 is_deeply( [ $f->in('t') ],
-           [ 't' ],
+           [ qw( t t/lib  ) ],
            "directory autostub" );
 
 
@@ -123,10 +123,10 @@ $f = $class->or( $class->directory
                         ->name('.svn')
                         ->prune
                         ->discard,
-                 $class->new );
+                 $class->new->file );
 
 is_deeply( [ sort $f->in('t') ],
-           [ 't', $this, 't/foobar' ],
+           [ $this, 't/foobar', 't/lib/File/Find/Rule/Test/ATeam.pm' ],
            "prune/discard .svn"
          );
 
@@ -136,10 +136,10 @@ $f = find(or => [ find( directory =>
                         name      => '.svn',
                         prune     =>
                         discard   => ),
-                  find() ]);
+                  find( file => ) ]);
 
 is_deeply( [ sort $f->in('t') ],
-           [ 't', $this, 't/foobar' ],
+           [ $this, 't/foobar', 't/lib/File/Find/Rule/Test/ATeam.pm' ],
            "procedural prune/discard .svn"
          );
 
@@ -190,18 +190,25 @@ is_deeply( [ sort +find( or => [ find( name => '.svn',
                                ],
                          maxdepth => 1,
                          in => 't' ) ],
-           [ 't', $this, 't/foobar' ],
+           [ 't', $this, 't/foobar', 't/lib' ],
            "maxdepth == 1" );
 
+
+my @ateam_path = qw( t/lib
+                     t/lib/File
+                     t/lib/File/Find
+                     t/lib/File/Find/Rule
+                     t/lib/File/Find/Rule/Test
+                     t/lib/File/Find/Rule/Test/ATeam.pm );
 
 is_deeply( [ sort +find( or => [ find( name => '.svn',
                                        prune =>
                                        discard =>),
-                                 find(),
+                                 find( ),
                                ],
                          mindepth => 1,
                          in => 't' ) ],
-           [ $this, 't/foobar' ],
+           [ $this, 't/foobar', @ateam_path ],
            "mindepth == 1" );
 
 
@@ -212,7 +219,7 @@ is_deeply( [ sort +find( or => [ find( name => '.svn',
                          maxdepth => 1,
                          mindepth => 1,
                          in => 't' ) ],
-           [ $this, 't/foobar' ],
+           [ $this, 't/foobar', 't/lib' ],
            "maxdepth = 1 mindepth == 1" );
 
 #iterator
@@ -226,7 +233,7 @@ $f = find( or => [ find( name => '.svn',
 {
 my @found;
 while ($_ = $f->match) { push @found, $_ }
-is_deeply( [ sort @found ], [ 't', $this, 't/foobar' ], "iterator" );
+is_deeply( [ sort @found ], [ 't', $this, 't/foobar', @ateam_path ], "iterator" );
 }
 
 # negating in the procedural interface
@@ -240,6 +247,20 @@ is_deeply( [ find( file => '!name' => qr/^[^.]{1,8}(\.[^.]{,3})?$/,
 is_deeply( [ find( maxdepth => 1, file => grep => [ qr/bytes./, [ qr/.?/ ] ], in => 't' ) ],
            [ 't/foobar' ],
            "grep" );
+
+# bootstrapping extensions via import
+
+use lib qw(t/lib);
+
+eval { $class->import(':Test::Elusive') };
+like( $@, qr/^couldn't bootstrap File::Find::Rule::Test::Elusive/,
+      "couldn't find the Elusive extension" );
+
+eval { $class->import(':Test::ATeam') };
+is ($@, "",  "if you can find them, maybe you can hire the A-Team" );
+can_ok( $class, 'ba' );
+
+
 
 # extra tests for findrule.  these are more for testing the parsing code.
 

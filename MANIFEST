@@ -5,4 +5,5 @@ Rule.pm
 Extending.pod
 t/File-Find-Rule.t
 t/foobar
+t/lib/File/Find/Rule/Test/ATeam.pm
 findrule
