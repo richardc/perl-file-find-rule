@@ -1,4 +1,4 @@
-HEAD
+0.20_01	22nd June 2003
 	- split the documentation of the procedural interface out to
 	  File::Find::Rule::Procedural, as people often seem to get
 	  confused that the method calls don't take anonymous arrays
