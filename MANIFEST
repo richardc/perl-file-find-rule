@@ -2,6 +2,7 @@ MANIFEST
 README
 Changes
 Makefile.PL
+Build.PL
 lib/File/Find/Rule.pm
 lib/File/Find/Rule/Extending.pod
 lib/File/Find/Rule/Procedural.pod
