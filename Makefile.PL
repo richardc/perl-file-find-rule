@@ -1,12 +1,12 @@
 use ExtUtils::MakeMaker;
 $module = 'Rule.pm';
 %depends = ( 'Test::More'      => 0,
-                'Number::Compare' => 0,
-                'Text::Glob'      => 0,
-                'File::Find'      => 0,
-                'File::Spec'      => 0,
-                'Cwd'             => 0,
-              );
+             'Number::Compare' => 0,
+             'Text::Glob'      => 0,
+             'File::Find'      => 0,
+             'File::Spec'      => 0,
+             'Cwd'             => 0,
+           );
 
 WriteMakefile(
               NAME         => 'File::Find::Rule',
