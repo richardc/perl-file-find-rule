@@ -81,7 +81,7 @@ is_deeply( [ $f->in('t') ],
 $f = $class
   ->directory
   ->maxdepth(1)
-  ->exec(sub { $_ ne '.svn' }); # ignore .svn dir
+  ->exec(sub { $_ !~ /(\.svn|CVS)/ }); # ignore .svn/CVS dirs
 
 is_deeply( [ $f->in('t') ],
            [ qw( t t/lib  ) ],
@@ -132,7 +132,7 @@ is_deeply( [ $f->in('t') ],
 # this test may be a little meaningless for a cpan release, but it
 # fires perfectly in my dev sandbox
 $f = $class->or( $class->directory
-                        ->name('.svn')
+                        ->name(qr/(\.svn|CVS)/)
                         ->prune
                         ->discard,
                  $class->new->file );
@@ -145,7 +145,7 @@ is_deeply( [ sort $f->in('t') ],
 
 # procedural form of the CVS demo
 $f = find(or => [ find( directory =>
-                        name      => '.svn',
+                        name      => qr/(\.svn|CVS)/,
                         prune     =>
                         discard   => ),
                   find( file => ) ]);
@@ -196,7 +196,7 @@ is_deeply( [ find( maxdepth => 0, in => 't' ) ],
            "maxdepth == 0" );
 
 
-is_deeply( [ sort +find( or => [ find( name => '.svn',
+is_deeply( [ sort +find( or => [ find( name => qr/(\.svn|CVS)/,
                                        discard =>),
                                  find(),
                                ],
@@ -213,7 +213,7 @@ my @ateam_path = qw( t/lib
                      t/lib/File/Find/Rule/Test
                      t/lib/File/Find/Rule/Test/ATeam.pm );
 
-is_deeply( [ sort +find( or => [ find( name => '.svn',
+is_deeply( [ sort +find( or => [ find( name => qr/(\.svn|CVS)/,
                                        prune =>
                                        discard =>),
                                  find( ),
@@ -224,7 +224,7 @@ is_deeply( [ sort +find( or => [ find( name => '.svn',
            "mindepth == 1" );
 
 
-is_deeply( [ sort +find( or => [ find( name => '.svn',
+is_deeply( [ sort +find( or => [ find( name => qr/(\.svn|CVS)/,
                                        discard =>),
                                  find(),
                                ],
@@ -240,7 +240,7 @@ find( extras => { preprocess => sub { $ok = 1 } }, in => 't' );
 ok( $ok, "extras preprocess fired" );
 
 #iterator
-$f = find( or => [ find( name => '.svn',
+$f = find( or => [ find( name => qr/(\.svn|CVS)/,
                          prune =>
                          discard =>),
                    find(),
