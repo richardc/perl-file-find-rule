@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 34;
+use Test::More tests => 36;
 
 my $class;
 my @tests = qw( t/File-Find-Rule.t t/findrule.t );
@@ -30,6 +30,18 @@ $f = $class->name( '*.t' );
 is_deeply( [ sort $f->in('t') ],
           \@tests,
           "name( '*.t' )" );
+
+$f = $class->name( 'foobar', '*.t' );
+is_deeply( [ sort $f->in('t') ],
+           [ @tests, 't/foobar' ],
+           "name( 'foobar', '*.t' )" );
+
+$f = $class->name( [ 'foobar', '*.t' ] );
+is_deeply( [ sort $f->in('t') ],
+           [ @tests, 't/foobar' ],
+           "name( [ 'foobar', '*.t' ] )" );
+
+
 
 # exec
 $f = $class->exec(sub { length == 6 })->maxdepth(1);
