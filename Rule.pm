@@ -725,9 +725,6 @@ repeatedly from match.  It'll probably be way more effecient to
 instead eval-string compile a dedicated matching sub, and call that to
 avoid the repeated sub dispatch.
 
-[1] This hash is filled close to the source, which is especially
-useful as half of our methods are auto-generated.
-
 [*] There's probably a win to be made with the current model in making
 stat calls use C<_>.  For
 
