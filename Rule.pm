@@ -48,53 +48,14 @@ File::Find::Rule - Alternative interface to File::Find
   $rule->name( '*.pm' );
   my @files = $rule->in( @INC );
 
-  # all those arrows - circle the wagons! (the procedural interface)
-  my @files = find(file => name => '*.pm', in => \@INC);
-
 =head1 DESCRIPTION
 
 File::Find::Rule is a friendlier interface to File::Find.  It allows
 you to build rules which specify the desired files and directories.
 
-=head2 Procedural interface
-
-=over
-
-=item C<find( @clauses )>
-
-=item C<rule( @clauses )>
-
-C<find> and C<rule> can be used to invoke any methods available to the
-OO version.  C<rule> is a synonym for C<find>
-
-Passing more than one value to a clause is done with an anonymous
-array:
-
- my $finder = find( name => [ '*.mp3', '*.ogg' ] );
-
-Returns an object, unless one of the arguments is C<in>, in which case
-it returns a list of things that match the rule.
-
- my @files = find( name => [ '*.mp3', '*.ogg' ], in => $ENV{HOME} );
-
-Please note that C<in> will be the last clause evaluated, and so this
-code will search for mp3s regardless of size.
-
- my @files = find( name => '*.mp3', in => $ENV{HOME}, size => '<2k' );
-                                                    ^
-                                                    |
-               Clause processing stopped here ------/
-
-It is also possible to invert a single rule by prefixing it with C<!>
-like so:
-
- # large files that aren't videos
- my @files = find( file    =>
-                   '!name' => [ '*.avi', '*.mov' ],
-                   size    => '>20M',
-                   in      => $ENV{HOME} );
-
 =cut
+
+# the procedural shim
 
 *rule = \&find;
 sub find {
@@ -704,14 +665,12 @@ Note here the use of a null rule.  Null rules match anything they see,
 so the effect is to match (and discard) directories called 'CVS' or to
 match anything.
 
-Another way to express this would be
-
- rule( not => rule( directory => name 'CVS', => prune => ) )
-
-Though this is entirely a stylistic choice dependant on how complex
-your rule needs to be.
-
 =back
+
+=head1 TWO FOR THE PRICE OF ONE
+
+File::Find::Rule also gives you a procedural interface.  This is
+documented in L<File::Find::Rule::Procedural>
 
 =head1 EXPORTS
 
@@ -744,8 +703,9 @@ under the same terms as Perl itself.
 
 L<File::Find>, L<Text::Glob>, L<Number::Compare>, find(1)
 
-And if you have an idea for a neat extension
-L<File::Find::Rule::Extending>
+If you want to know about the procedural interface, see
+L<File::Find::Rule::Procedural>, and if you have an idea for a neat
+extension L<File::Find::Rule::Extending>
 
 =cut
 
