@@ -1,6 +1,7 @@
 0.10	13th February 2003
 	- make the findrule tests more win32 safe/shell independent (picked 
 	  up by Philip Newton)
+	- autogenerate READMEs from bits and pieces
 
 0.09	21st January 2003
 	- Fix to the stat-based tests (spotted by Randal L. Schwartz)
