@@ -5,3 +5,4 @@ Rule.pm
 Extending.pod
 t/File-Find-Rule.t
 t/foobar
+findrule

@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 31;
+use Test::More tests => 37;
 
 my $class;
 my $this = "t/File-Find-Rule.t";
@@ -240,3 +240,27 @@ is_deeply( [ find( file => '!name' => qr/^[^.]{1,8}(\.[^.]{,3})?$/,
 is_deeply( [ find( maxdepth => 1, file => grep => [ qr/bytes./, [ qr/.?/ ] ], in => 't' ) ],
            [ 't/foobar' ],
            "grep" );
+
+# extra tests for findrule.  these are more for testing the parsing code.
+
+sub run ($) {
+    [ sort split /\n/, `$^X -Iblib/lib -Iblib/arch findrule $_[0] 2>&1` ];
+}
+
+is_deeply(run 't -file -name foobar', [ 't/foobar' ],
+          '-file -name foobar');
+
+is_deeply(run 't -maxdepth 0 -directory',
+          [ 't' ], 'last clause has no args');
+
+is_deeply(run 't -file -name \( foobar \*.t \)',
+          [ $this, 't/foobar' ], 'grouping ()');
+
+is_deeply(run 't -file -name foobar baz',
+          [ "unknown option 'baz'" ], 'no implicit grouping');
+
+is_deeply(run 't -maxdepth 0 -name -file',
+          [], 'terminate at next -');
+
+is_deeply(run 't -name \( -foo foobar \)',
+          [ 't/foobar' ], 'grouping ( -literal )');

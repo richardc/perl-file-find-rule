@@ -18,7 +18,7 @@ my @where;
 while (@ARGV) {
     local $_ = shift @ARGV;
     if (/^-/) {
-        unshift (@ARGV);
+        unshift @ARGV, $_;
         last;
     }
     push @where, $_;
@@ -28,11 +28,16 @@ while (@ARGV) {
 my $rule = new File::Find::Rule;
 while (@ARGV) {
     my $clause = shift @ARGV;
-    $clause =~ s/^-//;
 
-    unless ( $rule->can( $clause ) ) {
+    unless ( $clause =~ s/^-// && $rule->can( $clause ) ) {
         # not a known rule - complain about this
-        die "unknown option '-$clause'\n"
+        die "unknown option '$clause'\n"
+    }
+
+    # it was the last switch
+    unless (@ARGV) {
+        $rule->$clause();
+        next;
     }
 
     # consume the parameters
@@ -83,10 +88,37 @@ findrule - command line wrapper to File::Find::Rule
 C<findrule> mostly borrows the interface from GNU find(1) to provide a
 command-line interface onto the File::Find::Rule heirarchy of modules.
 
- find foo -file -name ( foo bar )
- find foo -file -name foo -bar
- find foo -file -name ( foo -bar )
+The syntax for expressions is the rule name, preceded by a dash,
+followed by an optional argument.  If the argument is an opening
+parenthesis it is taken as a list of arguments, terminated by a
+closing parenthesis.
 
+Some examples:
+
+ find -file -name ( foo bar )
+
+files named C<foo> or C<bar>, below the current directory.
+
+ find -file -name foo -bar
+
+files named C<foo>, that have pubs (for this is what our ficticious
+C<bar> clause specifies), below the current directory.
+
+ find -file -name ( -bar )
+
+files named C<-bar>, below the current directory.  In this case if
+we'd have omitted the parenthesis it would have parsed as a call to
+name with no arguments, followed by a call to -bar.
+
+=head2 Supported switches
+
+I'm very slack.  Please consult the File::Find::Rule manpage for now,
+and prepend - to the commands that you want.
+
+=head2 Extra bonus switches
+
+findrule automatically loads all of your installed File::Find::Rule::*
+extension modules, so check the documentation to see what those would be.
 
 =head1 AUTHOR
 
@@ -96,7 +128,7 @@ Richard Clamp <richardc@unixbeard.net> from a suggestion by Tatsuhiko Miyagawa
 
 Copyright (C) 2002 Richard Clamp.  All Rights Reserved.
 
-This module is free software; you can redistribute it and/or modify it
+This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =head1 SEE ALSO
@@ -104,4 +136,3 @@ under the same terms as Perl itself.
 L<File::Find::Rule>
 
 =cut
-

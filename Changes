@@ -1,6 +1,7 @@
 0.08	28th October, 2002
 	- ->not_* and implicit s#^\./## (based on suggestions by Tony
 	  Bowden)
+	- Sketchy first cut of findrule (suggestion from Tatsuhiko Miyagawa)
 
 0.07	25th October, 2002
 	- Tweaks required to let extensions work
