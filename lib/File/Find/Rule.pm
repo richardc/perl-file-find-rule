@@ -579,11 +579,16 @@ sub in {
     for my $path (@_) {
         # $topdir is used for relative and maxdepth
         $topdir = $path;
-        File::Find::find( { %{ $self->{extras} }, wanted => $sub }, $path );
+        $self->_call_find( { %{ $self->{extras} }, wanted => $sub }, $path );
     }
     chdir $cwd;
 
     return @found;
+}
+
+sub _call_find {
+    my $self = shift;
+    File::Find::find( @_ );
 }
 
 sub _compile {

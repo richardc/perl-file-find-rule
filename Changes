@@ -1,6 +1,6 @@
 head
-	exposed %X_tests and @stat_tests as package variables for
-	File::Find::Rule::Filesys::Virtual
+	exposed %X_tests and @stat_tests as package variables, and make a
+	_call_find method for File::Find::Rule::Filesys::Virtual
 
 0.27 Wednesday 25th February, 2004
 	Changed to write_makefile_pl to 'traditional' from
