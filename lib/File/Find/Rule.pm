@@ -136,9 +136,18 @@ expressions.
 
 =cut
 
+sub _flatten {
+    my @flat;
+    while (@_) {
+        my $item = shift;
+        ref $item eq 'ARRAY' ? push @_, @{ $item } : push @flat, $item;
+    }
+    return @flat;
+}
+
 sub name {
     my $self = _force_object shift;
-    my @names = map { ref $_ eq "Regexp" ? $_ : glob_to_regex $_ } @_;
+    my @names = map { ref $_ eq "Regexp" ? $_ : glob_to_regex $_ } _flatten( @_ );
 
     push @{ $self->{rules} }, {
         rule => 'name',
