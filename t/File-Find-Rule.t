@@ -11,6 +11,10 @@ BEGIN {
     use_ok($class)
 }
 
+# on win32 systems the t/foobar file isn't 10 bytes it's 11, so the
+# previous tests on the magic number 10 failed.  rt.cpan.org #3838
+my $foobar_size = -s 't/foobar';
+
 my $f = $class->new;
 isa_ok($f, $class);
 
@@ -49,7 +53,7 @@ is_deeply( [ $f->in('t') ],
            [ 't/foobar' ],
            "exec (short)" );
 
-$f = $class->exec(sub { length > 10 })->maxdepth(1);
+$f = $class->exec(sub { length > $foobar_size })->maxdepth(1);
 is_deeply( [ $f->in('t') ],
            [ 't/File-Find-Rule.t' ],
            "exec (long)" );
@@ -60,7 +64,7 @@ is_deeply( [ find( maxdepth => 1, exec => sub { $_[2] eq 't/foobar' }, in => 't'
 
 # name and exec, chained
 $f = $class
-  ->exec(sub { length > 10 })
+  ->exec(sub { length > $foobar_size })
   ->name( qr/\.t$/ );
 
 is_deeply( [ $f->in('t') ],
@@ -68,7 +72,7 @@ is_deeply( [ $f->in('t') ],
            "exec(match) and name(match)" );
 
 $f = $class
-  ->exec(sub { length > 10 })
+  ->exec(sub { length > $foobar_size })
   ->name( qr/foo/ )
   ->maxdepth(1);
 
@@ -91,7 +95,7 @@ is_deeply( [ $f->in('t') ],
 # any/or
 $f = $class->any( $class->exec( sub { length == 6 } ),
                   $class->name( qr/\.t$/ )
-                        ->exec( sub { length > 10 } )
+                        ->exec( sub { length > $foobar_size } )
                 )->maxdepth(1);
 
 is_deeply( [ sort $f->in('t') ],
@@ -100,7 +104,7 @@ is_deeply( [ sort $f->in('t') ],
 
 $f = $class->or( $class->exec( sub { length == 6 } ),
                  $class->name( qr/\.t$/ )
-                       ->exec( sub { length > 10 } )
+                       ->exec( sub { length > $foobar_size } )
                )->maxdepth(1);
 
 is_deeply( [ sort $f->in('t') ],
@@ -156,17 +160,19 @@ is_deeply( [ sort $f->in('t') ],
          );
 
 # size (stat test)
-is_deeply( [ find( maxdepth => 1, file => size => 10, in => 't' ) ],
+is_deeply( [ find( maxdepth => 1, file => size => $foobar_size, in => 't' ) ],
            [ 't/foobar' ],
-           "size 10 (stat)" );
+           "size $foobar_size (stat)" );
 
-is_deeply( [ find( maxdepth => 1, file => size => "<= 10", in => 't' ) ],
+is_deeply( [ find( maxdepth => 1, file => size => "<= $foobar_size",
+                   in => 't' ) ],
            [ 't/foobar' ],
-           "size <= 10 (stat)" );
+           "size <= $foobar_size (stat)" );
 
-is_deeply( [ find( maxdepth => 1, file => size => "<11", in => 't' ) ],
+is_deeply( [ find( maxdepth => 1, file => size => "<".($foobar_size + 1),
+                   in => 't' ) ],
            [ 't/foobar' ],
-           "size <11 (stat)" );
+           "size <($foobar_size + 1) (stat)" );
 
 is_deeply( [ find( maxdepth => 1, file => size => "<1K",
                    exec => sub { length == 6 },
