@@ -265,23 +265,28 @@ can_ok( $class, 'ba' );
 # extra tests for findrule.  these are more for testing the parsing code.
 
 sub run ($) {
-    [ sort split /\n/, `$^X -Iblib/lib -Iblib/arch findrule $_[0] 2>&1` ];
+    local *CHILD;
+    my $pid = open CHILD, "-|";
+    defined $pid or die "couldn't fork to pipe";
+    return [ sort map { chomp; $_ } <CHILD> ] if $pid;
+    open STDERR, ">&=STDOUT";
+    exec $^X, qw( -Iblib/lib -Iblib/arch findrule ), @{ $_[0] };
 }
 
-is_deeply(run 't -file -name foobar', [ 't/foobar' ],
+is_deeply(run [qw( t -file -name foobar )], [ 't/foobar' ],
           '-file -name foobar');
 
-is_deeply(run 't -maxdepth 0 -directory',
+is_deeply(run [qw( t -maxdepth 0 -directory )],
           [ 't' ], 'last clause has no args');
 
-is_deeply(run 't -file -name \( foobar \*.t \)',
+is_deeply(run [qw( t -file -name ( foobar *.t ) )],
           [ $this, 't/foobar' ], 'grouping ()');
 
-is_deeply(run 't -file -name foobar baz',
+is_deeply(run [qw( t -file -name foobar baz )],
           [ "unknown option 'baz'" ], 'no implicit grouping');
 
-is_deeply(run 't -maxdepth 0 -name -file',
+is_deeply(run [qw( t -maxdepth 0 -name -file )],
           [], 'terminate at next -');
 
-is_deeply(run 't -name \( -foo foobar \)',
+is_deeply(run [qw( t -name ( -foo foobar ) )],
           [ 't/foobar' ], 'grouping ( -literal )');
