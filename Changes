@@ -1,3 +1,9 @@
+0.27 Wednesday 25th February, 2004
+
+	Changed to write_makefile_pl to 'traditional' from
+	'passthrough'.  Fixes INDIRECTLY REPORTED install problems
+	caused by new Module::Build being backwards incompatible.
+
 0.26 Monday 10th November, 2003
 	Typo/thinko in File::Find::Rule::Extending corrected (spotted
 	by Jim Cromie)
