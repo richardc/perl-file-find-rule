@@ -1,6 +1,6 @@
 MANIFEST.SKIP
 .cvsignore
-CVS/
+\.svn
 blib/
 ^Makefile$
 pm_to_blib
