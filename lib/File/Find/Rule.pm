@@ -580,7 +580,7 @@ sub in {
 
     #use Data::Dumper;
     #print Dumper \@subs;
-    #print "Compiled sub: '$code'\n";
+    #warn "Compiled sub: '$code'\n";
 
     my $sub = eval "$code" or die "compile error '$code' $@";
     my $cwd = getcwd;
