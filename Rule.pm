@@ -136,7 +136,6 @@ sub new {
             iterator => [],
             maxdepth => undef,
             mindepth => undef,
-            absolute => 0,
           }, $class;
 }
 
