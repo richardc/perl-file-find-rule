@@ -248,33 +248,27 @@ L<Number::Compare> semantics.
 =cut
 
 {
-    my @tests = qw( dev ino mode nlink uid gid rdev
-                    size atime mtime ctime blksize blocks );
+    my @test_names = qw( dev ino mode nlink uid gid rdev
+                         size atime mtime ctime blksize blocks );
 
     my $i = 0;
-    for my $t (@tests) {
-        my $index = $i; # needs to be here so it can be closed over
+    for my $test (@test_names) {
+        my $index = $i++; # to close over
         my $sub = sub {
             my $self = _force_object shift;
 
-            my @tests = map { Number::Compare->new($_) } @_;
+            my @tests = map { Number::Compare->parse_to_perl($_) } @_;
 
             push @{ $self->{rules} }, {
-                rule => $t,
+                rule => $test,
                 args => \@_,
-                code => sub {
-                    my $value = (stat $_)[$index] || 0;
-                    for my $test (@tests) {
-                        return 1 if $test->($value);
-                    }
-                    return 0;
-                },
+                code => 'do { my $val = (stat $_)['.$index.'] || 0;'.
+                  join ('||', map { "(\$val $_)" } @tests ).' }',
             };
             $self;
         };
-        ++$i;
         no strict 'refs';
-        *$t = $sub;
+        *$test = $sub;
     }
 }
 
