@@ -194,7 +194,8 @@ C<accessed>, C<changed>), they have been included for completeness.
 
 =cut
 
-our %X_tests = (
+use vars qw( %X_tests );
+%X_tests = (
     -r  =>  readable           =>  -R  =>  r_readable      =>
     -w  =>  writeable          =>  -W  =>  r_writeable     =>
     -w  =>  writable           =>  -W  =>  r_writable      =>
@@ -246,8 +247,9 @@ L<Number::Compare> semantics.
 
 =cut
 
-our @stat_tests = qw( dev ino mode nlink uid gid rdev
-                      size atime mtime ctime blksize blocks );
+use vars qw( @stat_tests );
+@stat_tests = qw( dev ino mode nlink uid gid rdev
+                  size atime mtime ctime blksize blocks );
 {
     my $i = 0;
     for my $test (@stat_tests) {
