@@ -1,4 +1,4 @@
-#       $Id: Rule.pm,v 1.48 2002/10/11 21:49:20 richardc Exp $
+#       $Id$
 
 package File::Find::Rule;
 use strict;
