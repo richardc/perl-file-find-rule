@@ -20,9 +20,9 @@ File::Find::Rule::Extending - the mini-guide to extending File::Find::Rule
 
 =head1 DESCRIPTION
 
-File::Find::Rule went down so well with the buying public that every
-wanted to add extra features.  With the 0.07 release this became a
-possibility, using the following conventions.
+File::Find::Rule went down so well with the buying public that
+everyone wanted to add extra features.  With the 0.07 release this
+became a possibility, using the following conventions.
 
 =head2 Declare your package
 

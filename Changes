@@ -1,3 +1,7 @@
+head
+	Typo/thinko in File::Find::Rule::Extending corrected (spotted
+	by Jim Cromie)
+
 0.25 Wednesday 22nd October, 2003
 	applied a patch from Leon Brocard to make the tests ignore CVS dirs
 	as well as .svn dirs.
