@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -104,12 +104,14 @@ object if called as class methods.
 sub new {
     my $referent = shift;
     my $class = ref $referent || $referent;
-    bless { rules    => [],  # [0]
-            subs     => [],  # [1]
-            iterator => [],
-            maxdepth => undef,
-            mindepth => undef,
-          }, $class;
+    bless {
+        rules    => [],  # [0]
+        subs     => [],  # [1]
+        iterator => [],
+        extras   => {},
+        maxdepth => undef,
+        mindepth => undef,
+    }, $class;
 }
 
 sub _force_object {
@@ -454,12 +456,21 @@ used.
 Do not apply any tests at levels less than C<$level> (a non-negative
 integer).
 
+=item C<extras( \%extras )>
+
+Specifies extra values to pass through to C<File::File::find> as part
+of the options hash.
+
+For example this allows you to specify following of symlinks like so:
+
+ my $rule = File::Find::Rule->extras({ follow => 1 });
+
 May be invoked many times per rule, but only the most recent value is
 used.
 
 =cut
 
-for my $setter (qw( maxdepth mindepth )) {
+for my $setter (qw( maxdepth mindepth extras )) {
     my $sub = sub {
         my $self = _force_object shift;
         $self->{$setter} = shift;
@@ -572,7 +583,8 @@ sub in {
     #print "Compiled sub: '$code'\n";
 
     my $sub = eval "$code" or die "compile error '$code' $@";
-    File::Find::find( $sub, @_ );
+    # XXX need to let people pass things in to the hash
+    File::Find::find( { %{ $self->extras }, wanted => $sub }, @_ );
     chdir $cwd;
 
     return @found;
