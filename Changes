@@ -1,4 +1,4 @@
-0.24_01 Saturday 4th October, 2003
+0.24 Monday 6th October, 2003
 	when you specify an extra of C<{ follow => 1 }> File::Find stops
 	populating $File::Find::topdir.  This leads to warnings noise so
 	instead we now track $topdir ourselves.
