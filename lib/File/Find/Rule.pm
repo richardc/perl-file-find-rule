@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.23';
+$VERSION = '0.24_01';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -537,7 +537,6 @@ directories.
 sub in {
     my $self = _force_object shift;
 
-    my $cwd = getcwd;
     my @found;
     my $fragment = $self->_compile( $self->{subs} );
     my @subs = @{ $self->{subs} };
@@ -545,6 +544,7 @@ sub in {
     warn "relative mode handed multiple paths - that's a bit silly\n"
       if $self->{relative} && @_ > 1;
 
+    my $topdir;
     my $code = 'sub {
         (my $path = $File::Find::name)  =~ s#^\./##;
         my @args = ($_, $File::Find::dir, $path);
@@ -554,10 +554,10 @@ sub in {
 
         # figure out the relative path and depth
         my $relpath = $File::Find::name;
-        $relpath =~ s{^\Q$File::Find::topdir\E/?}{};
+        $relpath =~ s{^\Q$topdir\E/?}{};
         my $depth = scalar File::Spec->splitdir($relpath);
         #print "name: \'$File::Find::name\' ";
-        #print "relpath: \'$relpath\' depth: $depth\n";
+        #print "relpath: \'$relpath\' depth: $depth relative: $relative\n";
 
         defined $maxdepth && $depth >= $maxdepth
            and $File::Find::prune = 1;
@@ -570,8 +570,8 @@ sub in {
         my $discarded;
         return unless ' . $fragment . ';
         return if $discarded;
-        if ($relative && $relpath ne "") {
-            push @found, $relpath;
+        if ($relative) {
+            push @found, $relpath if $relpath ne "";
         }
         else {
             push @found, $path;
@@ -583,7 +583,12 @@ sub in {
     #print "Compiled sub: '$code'\n";
 
     my $sub = eval "$code" or die "compile error '$code' $@";
-    File::Find::find( { %{ $self->{extras} }, wanted => $sub }, @_ );
+    my $cwd = getcwd;
+    for my $path (@_) {
+        # $topdir is used for relative and maxdepth
+        $topdir = $path;
+        File::Find::find( { %{ $self->{extras} }, wanted => $sub }, $path );
+    }
     chdir $cwd;
 
     return @found;
