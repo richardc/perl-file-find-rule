@@ -2,7 +2,7 @@
 
 package File::Find::Rule;
 use strict;
-use vars qw/$VERSION $PACKAGE @ISA @EXPORT %TAKES_ARGS/;
+use vars qw/$VERSION @ISA @EXPORT %TAKES_ARGS/;
 use Exporter;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
@@ -13,7 +13,6 @@ use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 $VERSION = 0.07;
 @ISA = 'Exporter';
 @EXPORT = qw( find rule );
-$PACKAGE = __PACKAGE__; # what to bless into when going functionally
 
 =head1 NAME
 
@@ -86,7 +85,7 @@ like so:
 
 *rule = \&find;
 sub find {
-    my $object = $PACKAGE->new();
+    my $object = __PACKAGE__->new();
     my $not = 0;
 
     while (@_) {
