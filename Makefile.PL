@@ -4,11 +4,12 @@ WriteMakefile(
               NAME         => 'File::Find::Rule',
               VERSION_FROM => $module,
               PREREQ_PM    => {
-                               'Test::More' => 0,
-                               'Text::Glob' => 0,
-                               'File::Find' => 0,
-                               'File::Spec' => 0,
-                               'Cwd'        => 0,
+                               'Test::More'      => 0,
+                               'Number::Compare' => 0,
+                               'Text::Glob'      => 0,
+                               'File::Find'      => 0,
+                               'File::Spec'      => 0,
+                               'Cwd'             => 0,
                               },
               AUTHOR       => 'Richard Clamp <richardc@unixbeard.net>',
              );

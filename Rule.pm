@@ -6,6 +6,7 @@ use vars qw/$VERSION @ISA @EXPORT/;
 use Exporter;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
+use Number::Compare;
 use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
@@ -259,22 +260,14 @@ C<mode>, C<nlink>, C<uid>, C<gid>, C<rdev>, C<size>, C<atime>,
 C<mtime>, C<ctime>, C<blksize>, and C<blocks>.  See L<perlfunc/stat>
 for details.
 
-Each of these can take a target value, which may be relative.
+Each of these can take a number of targets, which will follow
+L<Number::Compare> semantics.
 
  $rule->size( 7 );         # exactly 7
- $rule->size( ">7" );      # greater than 7
+ $rule->size( ">7Ki" );    # larger than 7 * 1024 * 1024 bytes
  $rule->size( ">=7" )
       ->size( "<=90" );    # between 7 and 90, inclusive
  $rule->size( 7, 9, 42 );  # 7, 9 or 42
-
-This value may also use magnitudes of kilobytes (C<k>, C<ki>), megabytes
-(C<m>, C<mi>), or gigabytes (C<g>, C<gi>).  Those suffixed with an
-C<i> use the appropriate 2**n version in accordance with the IEC
-standard: http://physics.nist.gov/cuu/Units/binary.html
-
- $rule->size( '>200M'  ); # larger than 200,000,000 bytes
- $rule->size( '>200Mi' ); # larger than 209,715,200 bytse
- $rule->size( '<=200k' ); # 200,000 bytes or fewer
 
 =cut
 
@@ -288,26 +281,7 @@ standard: http://physics.nist.gov/cuu/Units/binary.html
         my $sub = sub {
             my $self = _force_object shift;
 
-            my @tests;
-            for my $test (@_) {
-                $test =~ m{^
-                           ([<>]=?)?   # comparison
-                           (.*?)       # value
-                           ([kmg]i?)?  # magnitude
-                           $}ix
-                  or croak "don't understand '$test' as a test";
-
-                my $comparison = $1 || '==';
-                my $target     = $2;
-                my $magnitude  = $3;
-                $target *=           1000 if lc $magnitude eq 'k';
-                $target *=           1024 if lc $magnitude eq 'ki';
-                $target *=        1000000 if lc $magnitude eq 'm';
-                $target *=      1024*1024 if lc $magnitude eq 'mi';
-                $target *=     1000000000 if lc $magnitude eq 'g';
-                $target *= 1024*1024*1024 if lc $magnitude eq 'gi';
-                push @tests, "$comparison $target";
-            }
+            my @tests = map { Number::Compare->new($_) } @_;
 
             push @{ $self->{rules} },
               { rule => $t,
@@ -315,7 +289,7 @@ standard: http://physics.nist.gov/cuu/Units/binary.html
                 code => sub {
                     my $value = (stat $_)[$index];
                     for my $test (@tests) {
-                        return 1 if eval "$value $test";
+                        return 1 if $test->($value);
                     }
                     return 0;
                 },
@@ -708,7 +682,7 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<File::Find>, find(1)
+L<File::Find>, L<Text::Glob>, L<Number::Compare>, find(1)
 
 =cut
 
