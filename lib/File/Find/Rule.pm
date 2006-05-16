@@ -581,6 +581,10 @@ sub in {
     for my $path (@_) {
         # $topdir is used for relative and maxdepth
         $topdir = $path;
+        # slice off the trailing slash if there is one (the
+        # maxdepth/mindepth code is fussy)
+        $topdir =~ s{/?$}{}
+          unless $topdir eq '/';
         $self->_call_find( { %{ $self->{extras} }, wanted => $sub }, $path );
     }
     chdir $cwd;
