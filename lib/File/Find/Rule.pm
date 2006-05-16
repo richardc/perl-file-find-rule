@@ -10,7 +10,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.28';
+$VERSION = '0.29';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -736,7 +736,7 @@ and Andy Lester andy@petdance.com.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Richard Clamp.  All Rights Reserved.
+Copyright (C) 2002, 2003, 2004, 2006 Richard Clamp.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
