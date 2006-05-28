@@ -540,7 +540,7 @@ sub in {
 
     my $topdir;
     my $code = 'sub {
-        (my $path = $File::Find::name)  =~ s#^\./##;
+        (my $path = $File::Find::name)  =~ s#^(?:\./+)+##;
         my @args = ($_, $File::Find::dir, $path);
         my $maxdepth = $self->{maxdepth};
         my $mindepth = $self->{mindepth};

@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 39;
+use Test::More tests => 41;
 
 my $class;
 my @tests = qw( t/File-Find-Rule.t t/findrule.t );
@@ -208,6 +208,7 @@ my $rule = find( or => [ find( name => qr/(\.svn|CVS)/,
                          find(),
                         ],
                  maxdepth => 1 );
+
 is_deeply( [ sort $rule->in( 't' ) ],
            [ 't', @tests, 't/foobar', 't/lib' ],
            "maxdepth == 1" );
@@ -215,7 +216,12 @@ is_deeply( [ sort $rule->in( 't/' ) ],
            [ 't', @tests, 't/foobar', 't/lib' ],
            "maxdepth == 1, trailing slash on the path" );
 
-
+is_deeply( [ sort $rule->in( './t' ) ],
+           [ 't', @tests, 't/foobar', 't/lib' ],
+           "maxdepth == 1, ./t" );
+is_deeply( [ sort $rule->in( './././///./t' ) ],
+           [ 't', @tests, 't/foobar', 't/lib' ],
+           "maxdepth == 1, ./././///./t" );
 
 my @ateam_path = qw( t/lib
                      t/lib/File
