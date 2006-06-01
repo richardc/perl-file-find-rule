@@ -1,4 +1,4 @@
-HEAD
+0.30 Wednesday 1st June, 2006
 	Made './//././././///.//././/////./blah' be treated the same 
         as './blah' (it gets turned into 'blah')
 
