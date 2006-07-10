@@ -390,7 +390,7 @@ sub exec {
     $self;
 }
 
-=item ->grep( @specifiers );
+=item C<grep( @specifiers )>
 
 Opens a file and tests it each line at a time.
 
