@@ -2,7 +2,6 @@ MANIFEST
 README
 Changes
 Makefile.PL
-Build.PL
 META.yml
 lib/File/Find/Rule.pm
 lib/File/Find/Rule/Extending.pod
