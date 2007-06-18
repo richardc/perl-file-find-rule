@@ -10,4 +10,8 @@ t/File-Find-Rule.t
 t/findrule.t
 t/foobar
 t/lib/File/Find/Rule/Test/ATeam.pm
+testdir/File-Find-Rule.t
+testdir/findrule.t
+testdir/foobar
+testdir/lib/File/Find/Rule/Test/ATeam.pm
 findrule
