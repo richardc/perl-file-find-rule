@@ -4,6 +4,12 @@
 use strict;
 use Test::More tests => 43;
 
+if (eval { require Test::Differences; 1 }) {
+    no warnings;
+    *is_deeply = *Test::Differences::eq_or_diff;
+}
+
+
 my $class;
 my @tests = qw( testdir/File-Find-Rule.t testdir/findrule.t );
 BEGIN {
