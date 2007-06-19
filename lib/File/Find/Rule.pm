@@ -622,7 +622,7 @@ then be queried using L</match>.  This allows you to use a rule as an
 iterator.
 
  my $rule = File::Find::Rule->file->name("*.jpeg")->start( "/web" );
- while ( my $image = $rule->match ) {
+ while ( defined ( my $image = $rule->match ) ) {
      ...
  }
 
