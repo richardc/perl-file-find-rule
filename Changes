@@ -1,3 +1,9 @@
+HEAD
+	Move to Makefile.PL
+	use Test::Differences in the testsuite if available.
+	Rearrange the testsuite so you don't keep tripping over yourself.	
+
+
 0.30 Wednesday 1st June, 2006
 	Made './//././././///.//././/////./blah' be treated the same 
         as './blah' (it gets turned into 'blah')
