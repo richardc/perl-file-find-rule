@@ -8,8 +8,6 @@ lib/File/Find/Rule/Extending.pod
 lib/File/Find/Rule/Procedural.pod
 t/File-Find-Rule.t
 t/findrule.t
-t/foobar
-t/lib/File/Find/Rule/Test/ATeam.pm
 testdir/File-Find-Rule.t
 testdir/findrule.t
 testdir/foobar
