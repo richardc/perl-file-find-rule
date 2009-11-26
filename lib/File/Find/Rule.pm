@@ -2,7 +2,6 @@
 
 package File::Find::Rule;
 use strict;
-use vars qw/$VERSION $AUTOLOAD/;
 use File::Spec;
 use Text::Glob 'glob_to_regex';
 use Number::Compare;
@@ -10,7 +9,7 @@ use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
-$VERSION = '0.30';
+our $VERSION = '0.30';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -500,6 +499,7 @@ the procedural interface.
 
 sub DESTROY {}
 sub AUTOLOAD {
+    our $AUTOLOAD;
     $AUTOLOAD =~ /::not_([^:]*)$/
       or croak "Can't locate method $AUTOLOAD";
     my $method = $1;
