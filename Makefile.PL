@@ -4,7 +4,6 @@ WriteMakefile(
     'NAME'         => 'File::Find::Rule',
     'VERSION_FROM' => 'lib/File/Find/Rule.pm',
     'PREREQ_PM'    => {
-        'Cwd'             => 0,
         'File::Find'      => 0,
         'File::Spec'      => 0,
         'Number::Compare' => 0,

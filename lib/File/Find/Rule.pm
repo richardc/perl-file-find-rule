@@ -7,7 +7,6 @@ use Text::Glob 'glob_to_regex';
 use Number::Compare;
 use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
-use Cwd;           # 5.00503s File::Find goes screwy with max_depth == 0
 
 our $VERSION = '0.30';
 
@@ -577,7 +576,6 @@ sub in {
     #warn "Compiled sub: '$code'\n";
 
     my $sub = eval "$code" or die "compile error '$code' $@";
-    my $cwd = getcwd;
     for my $path (@_) {
         # $topdir is used for relative and maxdepth
         $topdir = $path;
@@ -587,7 +585,6 @@ sub in {
           unless $topdir eq '/';
         $self->_call_find( { %{ $self->{extras} }, wanted => $sub }, $path );
     }
-    chdir $cwd;
 
     return @found;
 }
