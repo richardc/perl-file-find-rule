@@ -729,8 +729,8 @@ C<untaint_pattern>, and C<untaint_skip> for more information.
 
 =head1 BUGS
 
-The code relies on qr// compiled regexes, therefore this module
-requires perl version 5.005_03 or newer.
+The code makes use of the C<our> keyword and as such requires perl version
+5.6.0 or newer.
 
 Currently it isn't possible to remove a clause from a rule object.  If
 this becomes a significant issue it will be addressed.
