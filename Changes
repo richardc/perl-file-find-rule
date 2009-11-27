@@ -1,4 +1,4 @@
-HEAD
+0.31 Friday 27th November 2009
 	Move to Makefile.PL
 	use Test::Differences in the testsuite if available.
 	Rearrange the testsuite so you don't keep tripping over yourself.

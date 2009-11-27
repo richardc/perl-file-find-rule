@@ -8,7 +8,7 @@ use Number::Compare;
 use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
@@ -745,7 +745,7 @@ and Andy Lester andy@petdance.com.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002, 2003, 2004, 2006 Richard Clamp.  All Rights Reserved.
+Copyright (C) 2002, 2003, 2004, 2006, 2009 Richard Clamp.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
