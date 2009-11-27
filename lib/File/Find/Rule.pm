@@ -715,6 +715,18 @@ documented in L<File::Find::Rule::Procedural>
 
 L</find>, L</rule>
 
+=head1 TAINT MODE INTERACTION
+
+As of 0.32 File::Find::Rule doesn't capture the current working directory in
+a taint-unsafe manner.  File::Find itself still does operations that the taint
+system will flag as insecure but you can use the L</extras> feature to ask
+L<File::Find> to internally C<untaint> file paths with a regex like so:
+
+    my $rule = File::Find::Rule->extras({ untaint => 1 });
+    
+Please consult L<File::Find>'s documentation for C<untaint>,
+C<untaint_pattern>, and C<untaint_skip> for more information.
+
 =head1 BUGS
 
 The code relies on qr// compiled regexes, therefore this module

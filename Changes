@@ -4,6 +4,8 @@ HEAD
 	Rearrange the testsuite so you don't keep tripping over yourself.
 	Dropped 5.00503 backwards compatibility, allows some 5.6isms and
 	dropping the shonky Cwd code.
+	All taint 'bugs' are now the same as the behaviour of File::Find,
+	documentation has been added to describe this.
 
 
 0.30 Wednesday 1st June, 2006
