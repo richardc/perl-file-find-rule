@@ -1,7 +1,9 @@
 HEAD
 	Move to Makefile.PL
 	use Test::Differences in the testsuite if available.
-	Rearrange the testsuite so you don't keep tripping over yourself.	
+	Rearrange the testsuite so you don't keep tripping over yourself.
+	Dropped 5.00503 backwards compatibility, allows some 5.6isms and
+	dropping the shonky Cwd code.
 
 
 0.30 Wednesday 1st June, 2006
