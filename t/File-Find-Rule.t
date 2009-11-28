@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 43;
+use Test::More tests => 44;
 
 if (eval { require Test::Differences; 1 }) {
     no warnings;
@@ -116,6 +116,12 @@ $f = $class->or( $class->exec( sub { length == 6 } ),
 is_deeply( [ sort $f->in('testdir') ],
            [ 'testdir/File-Find-Rule.t', 'testdir/foobar' ],
            "or" );
+
+# nesting ->or (RT 46599)
+$f = $class->or( $class->or( $class->name("foobar") ) );
+is_deeply( [ sort $f->in('testdir') ],
+           [ 'testdir/foobar' ],
+           "or, nested" );
 
 
 # not/none

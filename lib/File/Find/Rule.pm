@@ -103,8 +103,8 @@ sub new {
     my $referent = shift;
     my $class = ref $referent || $referent;
     bless {
-        rules    => [],  # [0]
-        subs     => [],  # [1]
+        rules    => [],
+        subs     => {},
         iterator => [],
         extras   => {},
         maxdepth => undef,
@@ -288,15 +288,15 @@ interchangeable.
 
 sub any {
     my $self = _force_object shift;
-    my @rulesets = @_;
-
+    # compile all the subrules to code fragments
     push @{ $self->{rules} }, {
-        rule => 'any',
-        code => '(' . join( ' || ', map {
-            "( " . $_->_compile( $self->{subs} ) . " )"
-        } @_ ) . ")",
+        rule => "any",
+        code => '(' . join( ' || ', map '( ' . $_->_compile . ' )', @_ ). ')',
         args => \@_,
     };
+    
+    # merge all the subs hashes of the kids into ourself
+    %{ $self->{subs} } = map { %{ $_->{subs} } } $self, @_;
     $self;
 }
 
@@ -317,15 +317,15 @@ interchangeable.
 
 sub not {
     my $self = _force_object shift;
-    my @rulesets = @_;
 
     push @{ $self->{rules} }, {
         rule => 'not',
-        args => \@rulesets,
-        code => '(' . join ( ' && ', map {
-            "!(". $_->_compile( $self->{subs} ) . ")"
-        } @_ ) . ")",
+        args => \@_,
+        code => '(' . join ( ' && ', map { "!(". $_->_compile . ")" } @_ ) . ")",
     };
+    
+    # merge all the subs hashes into us
+    %{ $self->{subs} } = map { %{ $_->{subs} } } $self, @_;
     $self;
 }
 
@@ -531,8 +531,8 @@ sub in {
     my $self = _force_object shift;
 
     my @found;
-    my $fragment = $self->_compile( $self->{subs} );
-    my @subs = @{ $self->{subs} };
+    my $fragment = $self->_compile;
+    my %subs = %{ $self->{subs} };
 
     warn "relative mode handed multiple paths - that's a bit silly\n"
       if $self->{relative} && @_ > 1;
@@ -572,7 +572,7 @@ sub in {
     }';
 
     #use Data::Dumper;
-    #print Dumper \@subs;
+    #print Dumper \%subs;
     #warn "Compiled sub: '$code'\n";
 
     my $sub = eval "$code" or die "compile error '$code' $@";
@@ -596,19 +596,20 @@ sub _call_find {
 
 sub _compile {
     my $self = shift;
-    my $subs = shift; # [1]
 
     return '1' unless @{ $self->{rules} };
     my $code = join " && ", map {
         if (ref $_->{code}) {
-            push @$subs, $_->{code};
-            "\$subs[$#{$subs}]->(\@args) # $_->{rule}\n";
+            my $key = "$_->{code}";
+            $self->{subs}{$key} = $_->{code};
+            "\$subs{'$key'}->(\@args) # $_->{rule}\n";
         }
         else {
             "( $_->{code} ) # $_->{rule}\n";
         }
     } @{ $self->{rules} };
 
+    #warn $code;
     return $code;
 }
 
@@ -762,23 +763,19 @@ extension L<File::Find::Rule::Extending>
 
 Implementation notes:
 
-[0] Currently we use an array of anonymous subs, and call those
-repeatedly from match.  It'll probably be way more effecient to
-instead eval-string compile a dedicated matching sub, and call that to
-avoid the repeated sub dispatch.
+$self->rules is an array of hashrefs.  it may be a code fragment or a call
+to a subroutine.
 
-[1] Though [0] isn't as true as it once was, I'm not sure that the
-subs stack is exposed in quite the right way.  Maybe it'd be better as
-a private global hash.  Something like $subs{$self} = []; and in
-C<DESTROY>, delete $subs{$self}.
+Anonymous subroutines are stored in the $self->subs hashref keyed on the
+stringfied version of the coderef.
 
-That'd make compiling subrules really much easier (no need to pass
-@subs in for context), and things that work via a mix of callbacks and
-code fragments are possible (you'd probably want this for the stat
-tests).
+When one File::Find::Rule object is combined with another, such as in the any
+and not operations, this entire hash is merged.
 
-Need to check this currently working version in before I play with
-that though.
+The _compile method walks the rules element and simply glues the code
+fragments together so they can be compiled into an anyonymous File::Find
+match sub for speed
+
 
 [*] There's probably a win to be made with the current model in making
 stat calls use C<_>.  For
