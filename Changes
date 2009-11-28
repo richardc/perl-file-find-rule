@@ -1,6 +1,6 @@
-HEAD
-        Rework the referencing of anyonymous subroutines internally,
-        closes RT#46599 (Reported by Kevin Ryde)
+0.32 Saturday 28th November, 2009
+	Rework the referencing of anyonymous subroutines internally,
+	closes RT#46599 (Reported by Kevin Ryde)
 
 0.31 Friday 27th November 2009
 	Move to Makefile.PL
