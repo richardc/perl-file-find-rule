@@ -152,6 +152,7 @@ sub name {
     push @{ $self->{rules} }, {
         rule => 'name',
         code => join( ' || ', map { "m($_)" } @names ),
+        cost => 1,
         args => \@_,
     };
 
@@ -219,6 +220,7 @@ for my $test (keys %X_tests) {
         push @{ $self->{rules} }, {
             code => "' . $test . ' \$_",
             rule => "'.$X_tests{$test}.'",
+            cost => 4,
         };
         $self;
     } ';
@@ -262,6 +264,7 @@ use vars qw( @stat_tests );
                 args => \@_,
                 code => 'do { my $val = (stat $_)['.$index.'] || 0;'.
                   join ('||', map { "(\$val $_)" } @tests ).' }',
+                cost => 5,
             };
             $self;
         };
@@ -288,10 +291,19 @@ interchangeable.
 
 sub any {
     my $self = _force_object shift;
-    # compile all the subrules to code fragments
+
+    # compile all the subrules to code fragments, and ask of their costs
+    my @subrules = map +{ 
+        code => '( ' . $_->_compile . ' )',
+        cost => $_->_cost,
+    }, @_;
+    # sort based on cost, 'cheapest' first
+    @subrules = sort { $a->{cost} <=> $b->{cost} } @subrules;
+
     push @{ $self->{rules} }, {
         rule => "any",
-        code => '(' . join( ' || ', map '( ' . $_->_compile . ' )', @_ ). ')',
+        code => '(' . join( ' || ', map $_->{code}, @subrules ). ')',
+        cost => $subrules[-1]->{cost},
         args => \@_,
     };
     
@@ -318,10 +330,19 @@ interchangeable.
 sub not {
     my $self = _force_object shift;
 
+    # compile all the subrules to code fragments, and ask of their costs
+    my @subrules = map +{ 
+        code => '!( ' . $_->_compile . ' )',
+        cost => $_->_cost,
+    }, @_;
+    # sort based on cost, 'cheapest' first
+    @subrules = sort { $a->{cost} <=> $b->{cost} } @subrules;
+
     push @{ $self->{rules} }, {
         rule => 'not',
+        code => '(' . join ( ' && ', map $_->{code}, @subrules ) . ")",
+        cost => $subrules[-1]->{cost},
         args => \@_,
-        code => '(' . join ( ' && ', map { "!(". $_->_compile . ")" } @_ ) . ")",
     };
     
     # merge all the subs hashes into us
@@ -340,11 +361,10 @@ Traverse no further.  This rule always matches.
 sub prune () {
     my $self = _force_object shift;
 
-    push @{ $self->{rules} },
-      {
+    push @{ $self->{rules} }, {
        rule => 'prune',
-       code => '$File::Find::prune = 1'
-      };
+       code => '$File::Find::prune = 1',
+    };
     $self;
 }
 
@@ -384,6 +404,7 @@ sub exec {
     push @{ $self->{rules} }, {
         rule => 'exec',
         code => $code,
+        cost => 10,
     };
     $self;
 }
@@ -598,6 +619,14 @@ sub _compile {
     my $self = shift;
 
     return '1' unless @{ $self->{rules} };
+    my @ordered;
+    if (grep { !exists $_->{cost} } @{ $self->{rules} }) {
+        # any non-costed subrules, don't 'optimize'
+        @ordered = @{ $self->{rules} };
+    }
+    else {
+        @ordered = sort { $a->{cost} <=> $b->{cost} } @{ $self->{rules} };
+    }
     my $code = join " && ", map {
         if (ref $_->{code}) {
             my $key = "$_->{code}";
@@ -607,10 +636,19 @@ sub _compile {
         else {
             "( $_->{code} ) # $_->{rule}\n";
         }
-    } @{ $self->{rules} };
+    } @ordered;
 
     #warn $code;
     return $code;
+}
+
+sub _cost {
+    my $self = shift;
+    my $cost = 0;
+    for my $rule (@{ $self->{rules} }) {
+        $cost += $rule->{cost} || 0;
+    }
+    return $cost;
 }
 
 =item C<start( @directories )>
