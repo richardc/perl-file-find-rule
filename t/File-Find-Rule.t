@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 44;
+use Test::More tests => 45;
 
 if (eval { require Test::Differences; 1 }) {
     no warnings;
@@ -51,6 +51,10 @@ is_deeply( [ sort $f->in('testdir') ],
            [ @tests, 'testdir/foobar' ],
            "name( [ 'foobar', '*.t' ] )" );
 
+$f = $class->name( "test(*" );
+is_deeply( [ sort $f->in('testdir') ],
+           [],
+           'name("test(*"); used to be invalid' );
 
 
 # exec

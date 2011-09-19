@@ -151,7 +151,7 @@ sub name {
 
     push @{ $self->{rules} }, {
         rule => 'name',
-        code => join( ' || ', map { "m($_)" } @names ),
+        code => join( ' || ', map { "m{$_}" } @names ),
         args => \@_,
     };
 
