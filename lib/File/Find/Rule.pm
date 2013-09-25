@@ -109,6 +109,7 @@ sub new {
         extras   => {},
         maxdepth => undef,
         mindepth => undef,
+        trace    => undef,
     }, $class;
 }
 
@@ -472,6 +473,17 @@ for my $setter (qw( maxdepth mindepth extras )) {
     *$setter = $sub;
 }
 
+=item C<trace>
+
+Enable tracing of execution.
+
+=cut
+
+sub trace () {
+    my $self = _force_object shift;
+    $self->{trace} = 1;
+    $self;
+}
 
 =item C<relative>
 
@@ -544,29 +556,38 @@ sub in {
         my $maxdepth = $self->{maxdepth};
         my $mindepth = $self->{mindepth};
         my $relative = $self->{relative};
+        my $trace    = $self->{trace};
 
         # figure out the relative path and depth
         my $relpath = $File::Find::name;
         $relpath =~ s{^\Q$topdir\E/?}{};
         my $depth = scalar File::Spec->splitdir($relpath);
-        #print "name: \'$File::Find::name\' ";
-        #print "relpath: \'$relpath\' depth: $depth relative: $relative\n";
+        print "name: \'$File::Find::name\' " if $trace;
+        print "relpath: \'$relpath\' depth: $depth relative: $relative\n" if $trace;
 
-        defined $maxdepth && $depth >= $maxdepth
-           and $File::Find::prune = 1;
+        if (defined $maxdepth && $depth >= $maxdepth) {
+            print "  exceeded maxdepth, pruning\n" if $trace;
+            $File::Find::prune = 1;
+        }
 
-        defined $mindepth && $depth < $mindepth
-           and return;
+        if (defined $mindepth && $depth < $mindepth) {
+           print " shallower than mindepth, skipping" if $trace;
+           return;
+        }
 
-        #print "Testing \'$_\'\n";
+        print "Testing \'$_\'\n" if $trace;
 
         my $discarded;
         return unless ' . $fragment . ';
         return if $discarded;
         if ($relative) {
-            push @found, $relpath if $relpath ne "";
+            if ($relpath ne "") {
+                print " keeping \'$relpath\'\n" if $trace;
+                push @found, $relpath;
+            }
         }
         else {
+            print " keeping \'$path\'\n" if $trace;
             push @found, $path;
         }
     }';
