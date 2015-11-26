@@ -564,10 +564,10 @@ sub in {
         return unless ' . $fragment . ';
         return if $discarded;
         if ($relative) {
-            push @found, $relpath if $relpath ne "";
+            push @found, File::Spec->canonpath($relpath) if $relpath ne "";
         }
         else {
-            push @found, $path;
+            push @found, File::Spec->canonpath($path);
         }
     }';
 
