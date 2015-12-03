@@ -2,7 +2,8 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 45;
+use Test::More tests => 46;
+use File::Spec;
 
 if (eval { require Test::Differences; 1 }) {
     no warnings;
@@ -314,6 +315,10 @@ is_deeply( [ find( 'relative', maxdepth => 1, name => 'foobar', in => 'testdir' 
            [ 'foobar' ],
            'relative' );
 
+# normalize
+is_deeply( [ find( 'canonpath', name => 'ATeam.pm', in => 'testdir' ) ],
+           [ File::Spec->catfile(qw(testdir lib File Find Rule Test ATeam.pm)) ],
+           'canonpath' );
 
 
 # bootstrapping extensions via import
