@@ -1,3 +1,7 @@
+0.34 Thursday 4th December, 2015
+        Add canonpath option to normalize file-path
+        separators.  Work by Mithun Ayachit.
+
 0.33 Monday 19th September, 2011
         Fixes the case where name("foo(*") hits an error with mismatched
         parentheis.  Reported by Jan Engelhardt.

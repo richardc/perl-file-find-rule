@@ -8,7 +8,7 @@ use Number::Compare;
 use Carp qw/croak/;
 use File::Find (); # we're only wrapping for now
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 # we'd just inherit from Exporter, but I want the colon
 sub import {
