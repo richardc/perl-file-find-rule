@@ -420,7 +420,7 @@ sub grep {
 
     $self->exec( sub {
         local *FILE;
-        open FILE, $_ or return;
+        open FILE, '<', $_ or return;
         local ($_, $.);
         while (<FILE>) {
             for my $p (@pattern) {
