@@ -599,8 +599,6 @@ sub in {
     for my $path (@_) {
         # $topdir is used for relative and maxdepth
         $topdir = $path;
-        $topdir =~ s{\\}{/}g
-          if $^O eq q{MSWin32} and $File::Find::VERSION ge 1.41;
         # slice off the trailing slash if there is one (the
         # maxdepth/mindepth code is fussy)
         $topdir =~ s{/?$}{}

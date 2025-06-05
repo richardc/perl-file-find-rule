@@ -2,7 +2,7 @@
 #       $Id$
 
 use strict;
-use Test::More tests => 48;
+use Test::More tests => 46;
 use File::Spec;
 
 if (eval { require Test::Differences; 1 }) {
@@ -332,21 +332,3 @@ like( $@, qr/^couldn't bootstrap File::Find::Rule::Test::Elusive/,
 eval { $class->import(':Test::ATeam') };
 is ($@, "",  "if you can find them, maybe you can hire the A-Team" );
 can_ok( $class, 'ba' );
-
-
-#  File::Find 1.41
-{
-    #  need to normalise paths for comparison
-    my @got =
-        map {File::Spec->canonpath ($_)}
-        map {File::Spec->rel2abs($_)}
-        find->file()->name('*.t')->maxdepth(1)->in('./testdir');
-
-    my @expected =
-        map {File::Spec->canonpath ($_)}
-        map {File::Spec->rel2abs($_)}
-        glob 'testdir/*.t';
-
-    is scalar @got, 2, "Got correct number of files";
-    is_deeply(\@got, \@expected, 'Found expected files');
-}
